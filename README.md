@@ -1,6 +1,6 @@
 # MiSTer Tutorials
 
-These are tutorials translated from the mist project to work with MiSTer.  
+These are tutorials translated from the [mist](https://github.com/mist-devel/mist-board/tree/master/tutorials/soc) project to work with MiSTer.  
 
 
 What is this?
