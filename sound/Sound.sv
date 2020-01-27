@@ -297,7 +297,7 @@ arcade_video #(256,224,24) arcade_video
 wire [15:0] audio_l;
 wire [15:0] audio_r;
 assign AUDIO_L = audio_l;
-assign AUDIO_R = AUDIO_L;
+assign AUDIO_R = audio_r;
 assign AUDIO_S = 0; 
 
 reg [1:0] difficulty = 2'b01;
@@ -349,7 +349,7 @@ soc soc(
 reg    [13:0]rom_a_two; 
 wire   [7:0]rom_d_two;
 
-dpram #(8,16) rom
+dpram #(16,8) rom
 (
 	.clock_a(clk_sys),
 	.wren_a(ioctl_wr),
@@ -401,6 +401,7 @@ wire reset = status[0] | buttons[1] |ioctl_download;
 wire [7:0] short_audio;
 wire [7:0] short_audio_two;
 assign audio_l = {1'b0,short_audio,7'b0} +  {1'b0,short_audio_two,7'b0};
+assign audio_r = {1'b0,short_audio_two,7'b0};
 
 
    wav_player wav(
