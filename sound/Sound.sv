@@ -286,6 +286,7 @@ arcade_video #(256,224,24) arcade_video
 	.VBlank(vblank),
 	.HSync(hs),
 	.VSync(vs),
+	.forced_scandoubler(0),
 
 	.no_rotate(1),
 	.rotate_ccw(0),
@@ -398,6 +399,7 @@ wire reset = status[0] | buttons[1] |ioctl_download;
 
 
 wire [7:0] short_audio;
+wire [7:0] short_audio_two;
 assign audio_l = {1'b0,short_audio,7'b0} +  {1'b0,short_audio_two,7'b0};
 
 
