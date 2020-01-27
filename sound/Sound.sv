@@ -105,8 +105,6 @@ localparam CONF_STR = {
 	"H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
 	"-;",
-	"DIP;",
-	"-;",
 	"R0,Reset;",
 	"J1,Fire,Start 1P,Start 2P,Coin,Cheat;",
 	"jn,A,Start,Select,R,L;",
@@ -140,7 +138,7 @@ wire        ioctl_download;
 wire  [7:0] ioctl_index;
 wire        ioctl_wr;
 wire [24:0] ioctl_addr;
-wire  [15:0] ioctl_dout;
+wire  [7:0] ioctl_dout;
 
 wire [10:0] ps2_key;
 
@@ -151,7 +149,7 @@ wire [15:0] joy2a;
 
 wire [21:0] gamma_bus;
 
-hps_io #(.STRLEN($size(CONF_STR)>>3), .WIDE(1)) hps_io
+hps_io #(.STRLEN($size(CONF_STR)>>3), .WIDE(0)) hps_io
 (
 	.clk_sys(clk_sys),
 	.HPS_BUS(HPS_BUS),
@@ -248,12 +246,18 @@ wire [7:0] outr,outg;
 wire [7:0] outb;
 
 reg ce_pix;
-always @(posedge clk_sys) begin
+always @(posedge clk_48) begin
+       ce_pix <= !ce_pix;
+end
+/*
+reg ce_pix;
+always @(posedge clk_48) begin
         reg [1:0] div;
         div <= div + 1'd1;
         ce_pix <= !div;
 end
-
+*/
+/*
 arcade_video #(256,224,24) arcade_video
 (
 	.*,
@@ -265,6 +269,23 @@ arcade_video #(256,224,24) arcade_video
 	.VBlank(ovblank),
 	.HSync(ohs),
 	.VSync(ovs),
+
+	.no_rotate(1),
+	.rotate_ccw(0),
+	.fx(status[5:3])
+);
+*/
+arcade_video #(256,224,24) arcade_video
+(
+	.*,
+
+	.clk_video(clk_48),
+
+	.RGB_in({r,g,b}),
+	.HBlank(hblank),
+	.VBlank(vblank),
+	.HSync(hs),
+	.VSync(vs),
 
 	.no_rotate(1),
 	.rotate_ccw(0),
@@ -327,7 +348,7 @@ soc soc(
 reg    [13:0]rom_a_two; 
 wire   [7:0]rom_d_two;
 
-dpram #(16,16) rom
+dpram #(8,16) rom
 (
 	.clock_a(clk_sys),
 	.wren_a(ioctl_wr),
