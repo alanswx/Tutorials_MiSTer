@@ -2,6 +2,7 @@
 // (c) 2015 Till Harbaum
 
 module soc (
+   input  reset,
    input  pixel_clock,
    output SDRAM_nCS,
    output VGA_HS,
@@ -18,7 +19,8 @@ module soc (
 assign SDRAM_nCS = 1;
 
 
-vga vga (
+video_gen video_gen (
+	 .reset (reset),
 	 .pclk  (pixel_clock),
 	 .hs    (VGA_HS),
 	 .vs    (VGA_VS),

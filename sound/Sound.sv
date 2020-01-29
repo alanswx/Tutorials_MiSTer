@@ -113,7 +113,7 @@ localparam CONF_STR = {
 
 ////////////////////   CLOCKS   ///////////////////
 
-wire clk_sys, clk_ram, clk_48;
+wire clk_sys, clk_36, clk_48;
 wire pll_locked;
 
 pll pll
@@ -121,7 +121,7 @@ pll pll
 	.refclk(CLK_50M),
 	.rst(0),
 	.outclk_0(clk_48),
-	.outclk_1(clk_ram), // 36
+	.outclk_1(clk_36), // 36
 	.outclk_2(clk_sys),  //24
 	.locked(pll_locked)
 );
@@ -227,7 +227,7 @@ reg btn_left_2=0;
 reg btn_right_2=0;
 reg btn_fire_2=0;
 
-wire no_rotate = 1;
+wire no_rotate = status[2];
 wire m_fire     = btn_fire    | joy1[4];
 wire m_fire_2   = btn_fire_2  | joy2[4];
 wire m_start    = btn_start_1 | joy1[5] | joy2[5];
@@ -244,20 +244,22 @@ wire [7:0] r,g;
 wire [7:0] b;
 wire [7:0] outr,outg;
 wire [7:0] outb;
-
+/*
 reg ce_pix;
 always @(posedge clk_48) begin
        ce_pix <= !ce_pix;
 end
-/*
+*/
+
+// should be 1.5MHZ
 reg ce_pix;
 always @(posedge clk_48) begin
-        reg [1:0] div;
+        reg [2:0] div;
         div <= div + 1'd1;
         ce_pix <= !div;
 end
-*/
-/*
+
+
 arcade_video #(256,224,24) arcade_video
 (
 	.*,
@@ -270,18 +272,22 @@ arcade_video #(256,224,24) arcade_video
 	.HSync(ohs),
 	.VSync(ovs),
 
+	.forced_scandoubler(0),
 	.no_rotate(1),
 	.rotate_ccw(0),
 	.fx(status[5:3])
 );
-*/
-arcade_video #(256,224,24) arcade_video
+
+/*
+arcade_video #(256,224,9) arcade_video
 (
 	.*,
 
 	.clk_video(clk_48),
 
-	.RGB_in({r,g,b}),
+	//.RGB_in({r,g,b}),
+	.RGB_in({r[7:5],g[7:5],b[7:5]}),
+	//.RGB_in({3'b111,3'b0,3'b0}),
 	.HBlank(hblank),
 	.VBlank(vblank),
 	.HSync(hs),
@@ -292,7 +298,7 @@ arcade_video #(256,224,24) arcade_video
 	.rotate_ccw(0),
 	.fx(status[5:3])
 );
-
+*/
 
 wire [15:0] audio_l;
 wire [15:0] audio_r;
@@ -300,7 +306,7 @@ assign AUDIO_L = audio_l;
 assign AUDIO_R = audio_r;
 assign AUDIO_S = 0; 
 
-reg [1:0] difficulty = 2'b01;
+wire [1:0] difficulty = 2'b01;
 
 
 ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
@@ -327,12 +333,13 @@ ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
         .ena(1'b1),
 
         .in0(difficulty),
-        .in1(2'b00),
+        .in1()
 );
 
 
 soc soc(
    .pixel_clock(ce_pix), // wrong
+   .reset(reset), // wrong
    .SDRAM_nCS(junk),
    .VGA_HS(hs),
    .VGA_VS(vs),
