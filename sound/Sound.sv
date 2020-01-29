@@ -308,6 +308,7 @@ assign AUDIO_S = 0;
 
 wire [1:0] difficulty = 2'b01;
 
+wire de;
 
 ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
         .i_r(r),
@@ -315,7 +316,7 @@ ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
         .i_b(b),
         .i_hs(hs),
         .i_vs(vs),
-        .i_de(vgade),
+        .i_de(de),
         .i_hblank(hblank),
         .i_vblank(vblank),
         .i_en(ce_pix),
