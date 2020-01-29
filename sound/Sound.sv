@@ -209,6 +209,34 @@ always @(posedge clk_sys) begin
 	end
 end
 
+always @(posedge clk_sys) begin
+	if (btn3_up) begin
+		difficulty <= difficulty-1;
+
+	end
+	if (btn4_up) begin
+		difficulty <= difficulty+1;
+
+	end
+end
+  wire btn3_state, btn3_dn, btn3_up;
+    debounce d_btn3 (
+      .clk(clk_sys),
+      .i_btn(btn_left),
+        .o_state(btn3_state),
+        .o_ondn(btn3_dn),
+        .o_onup(btn3_up)
+    );
+  wire btn4_state, btn4_dn, btn4_up;
+    debounce d_btn4 (
+      .clk(clk_sys),
+      .i_btn(btn_right),
+        .o_state(btn4_state),
+        .o_ondn(btn4_dn),
+        .o_onup(btn4_up)
+    );
+
+
 reg btn_up    = 0;
 reg btn_down  = 0;
 reg btn_right = 0;
@@ -306,16 +334,16 @@ assign AUDIO_L = audio_l;
 assign AUDIO_R = audio_r;
 assign AUDIO_S = 0; 
 
-wire [1:0] difficulty = 2'b01;
+reg [9:0] difficulty = 2'b01;
 
 wire de;
 
-ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
+ovo #(.COLS(2), .LINES(2), .RGB(24'hFF00FF)) diff (
         .i_r(r),
         .i_g(g),
         .i_b(b),
-        .i_hs(hs),
-        .i_vs(vs),
+        .i_hs(~hs),
+        .i_vs(~vs),
         .i_de(de),
         .i_hblank(hblank),
         .i_vblank(vblank),
@@ -334,7 +362,7 @@ ovo #(.COLS(1), .LINES(1), .RGB(24'hFF00FF)) diff (
         .ena(1'b1),
 
         .in0(difficulty),
-        .in1()
+        .in1(difficulty-1)
 );
 
 
