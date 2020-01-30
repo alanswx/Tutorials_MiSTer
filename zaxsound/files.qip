@@ -6,4 +6,4 @@ set_global_assignment -name VHDL_FILE ovo.vhd
 set_global_assignment -name VHDL_FILE base_pack.vhd
 set_global_assignment -name VHDL_FILE dpram.vhd
 set_global_assignment -name SYSTEMVERILOG_FILE dkongjr_wav_sound.v
-set_global_assignment -name SYSTEMVERILOG_FILE "Sound.sv"
+set_global_assignment -name SYSTEMVERILOG_FILE "ZaxSound.sv"
