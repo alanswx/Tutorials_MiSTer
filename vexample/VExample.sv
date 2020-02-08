@@ -335,7 +335,7 @@ wire [15:0] audio_l;
 wire [15:0] audio_r;
 assign AUDIO_L = audio_l;
 assign AUDIO_R = audio_r;
-assign AUDIO_S = 1; 
+assign AUDIO_S = 0; 
 
 wire [9:0] probe_0= {1'b0,rom_a_two[7:4],1'b0,rom_a_two[3:0]};
 //wire [9:0] probe_1= {2'b0,rom_d};
@@ -448,7 +448,7 @@ dpram_dc #(8,17) rom
 (
         .clock_a(clk_sys),
         .wren_a(ioctl_wr),
-        .address_a(ioctl_addr[15:0]),
+        .address_a(ioctl_addr[16:0]),
         .data_a(ioctl_dout),
 	.byteena_a(1'b1),
 	.q_a(),

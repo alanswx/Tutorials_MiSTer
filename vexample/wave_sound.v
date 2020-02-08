@@ -124,7 +124,7 @@ begin
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 				end
 				
-				if (bits_per_sample==16'd16 && sample_state ==0) 
+				if (inheader==0 && bits_per_sample==16'd16 && sample_state ==0) 
 				begin
 					W_SAMPLE_TOP=I_DMA_DATA;
 					sample_state=1;
@@ -144,7 +144,8 @@ begin
 					sample_state=0;
 					//W_SAMPL <= W_DMA_DATA[23:8];
 					if (bits_per_sample==16) begin
-						W_SAMPL <= {W_SAMPLE_TOP,W_DMA_DATA};
+						//W_SAMPL <= {W_SAMPLE_TOP,W_DMA_DATA};
+						W_SAMPL <= {W_DMA_DATA,W_SAMPLE_TOP};
 					end else begin
 						W_SAMPL <= W_DMA_DATA[7:0];
 					end
