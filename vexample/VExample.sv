@@ -335,7 +335,7 @@ wire [15:0] audio_l;
 wire [15:0] audio_r;
 assign AUDIO_L = audio_l;
 assign AUDIO_R = audio_r;
-assign AUDIO_S = 0; 
+assign AUDIO_S = 1; 
 
 wire [9:0] probe_0= {1'b0,rom_a_two[7:4],1'b0,rom_a_two[3:0]};
 //wire [9:0] probe_1= {2'b0,rom_d};
@@ -418,16 +418,15 @@ wire reset = status[0] | buttons[1] |ioctl_download;
 
 
 
-wire [7:0] short_audio;
-wire [7:0] short_audio_two;
-assign audio_l = {1'b0,short_audio,7'b0} +  {1'b0,short_audio_two,7'b0};
-assign audio_r = {1'b0,short_audio_two,7'b0};
+wire [15:0] short_audio;
+assign audio_l  = short_audio;
+assign audio_r = audio_l;
 
 
 
 
 ////////////////////////////  MEMORY  ///////////////////////////////////
-reg    [15:0]rom_a_two;
+reg    [16:0]rom_a_two;
 wire   [7:0]rom_d_two;
 
 wave_sound wave_sound
@@ -436,7 +435,7 @@ wave_sound wave_sound
 		  .I_CLK_SPEED('d24000000),
         .I_RSTn(~reset),
         .I_H_CNT(4'b0001), // used to interleave data reads
-        .I_DMA_TRIG(start),
+        .I_DMA_TRIG(btn0_up),
         .I_DMA_STOP(1'b0),
         .I_DMA_CHAN(3'b0), // 8 channels
         .I_DMA_ADDR(16'b0),
@@ -445,7 +444,7 @@ wave_sound wave_sound
         .O_SND(short_audio)
 );
 
-dpram_dc #(8,16) rom
+dpram_dc #(8,17) rom
 (
         .clock_a(clk_sys),
         .wren_a(ioctl_wr),

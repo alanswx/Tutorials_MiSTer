@@ -16,15 +16,15 @@ module wave_sound
 	input		I_DMA_TRIG,
 	input		I_DMA_STOP,
 	input		[2:0]I_DMA_CHAN, // 8 channels
-	input		[15:0]I_DMA_ADDR,
+	input		[16:0]I_DMA_ADDR,
 	input		[7:0]I_DMA_DATA, // Data coming back from wave ROM
 
-	output	[15:0]O_DMA_ADDR, // output address to wave ROM
+	output	[16:0]O_DMA_ADDR, // output address to wave ROM
 	output	signed [15:0]O_SND
 );
 
 reg [11:0]W_DIV;
-reg [15:0]W_DMA_ADDR;
+reg [16:0]W_DMA_ADDR;
 reg [15:0]W_DMA_LEN;
 reg signed [7:0]W_DMA_DATA;
 reg signed [7:0]W_SAMPLE_TOP;
@@ -86,7 +86,6 @@ begin
 						'd03: ; // I
 						'd04: ; // F
 						'd05: ; // F
-						'd05: ;
 						'd24: num_channels[7:0]  <= W_DMA_DATA ;
 						'd25: num_channels[15:8] <= W_DMA_DATA;
 						'd26: sample_rate[7:0]   <= W_DMA_DATA;
