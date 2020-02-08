@@ -78,28 +78,29 @@ wire [7:0] ld;
 
 
 ////////////////////////////  MEMORY  ///////////////////////////////////
-reg    [15:0]rom_a_two;
+reg    [16:0]rom_a_two;
 wire   [7:0]rom_d_two;
 
 wave_sound wave_sound
 (
         .I_CLK(clk_sys),
+        .I_CLK_SPEED('d2000000),
         .I_RSTn(~reset),
         .I_H_CNT(4'b0001), // used to interleave data reads
         .I_DMA_TRIG(start),
         .I_DMA_STOP(1'b0),
         .I_DMA_CHAN(3'b0), // 8 channels
-        .I_DMA_ADDR(16'b0),
+        .I_DMA_ADDR(17'b0),
         .I_DMA_DATA(rom_d_two), // Data coming back from wave ROM
         .O_DMA_ADDR(rom_a_two), // output address to wave ROM
         .O_SND()
 );
 
-dpram_dc #(8,16) rom
+dpram_dc #(8,17) rom
 (
         .clock_a(clk_sys),
         .wren_a(ioctl_wr),
-        .address_a(ioctl_addr[15:0]),
+        .address_a(ioctl_addr[16:0]),
         .data_a(ioctl_dout),
 	.byteena_a(1'b1),
 	.q_a(),

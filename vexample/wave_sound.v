@@ -41,7 +41,7 @@ reg [15:0] block_align;
 reg [15:0] bits_per_sample;
 reg [31:0] data_size;
 
-reg sample_state = 0;
+reg sample_state;
 
 always@(posedge I_CLK or negedge I_RSTn)
 begin
@@ -54,6 +54,7 @@ begin
 		W_DMA_ADDR		<= 0;
 		W_DMA_TRIG		<= 0;
 		sample			<= 0;
+		sample_state		<= 0;
 		inheader <= 1'b1;
 	 
 	end else begin
@@ -115,9 +116,9 @@ begin
 								$display("data_size %x %d\n",data_size,data_size);
 								data_size <= data_size + 44;
 								$display("data_size %x %d\n",data_size,data_size);
-								W_DMA_LEN=data_size[15:0];
-								W_DIV = I_CLK_SPEED / sample_rate;
-								sample_state = 0;
+								W_DMA_LEN<=data_size[15:0];
+								W_DIV <= I_CLK_SPEED / sample_rate;
+								sample_state <= 0;
 							end
 					endcase
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
@@ -126,8 +127,8 @@ begin
 				
 				if (inheader==0 && bits_per_sample==16'd16 && sample_state ==0) 
 				begin
-					W_SAMPLE_TOP=I_DMA_DATA;
-					sample_state=1;
+					W_SAMPLE_TOP<=I_DMA_DATA;
+					sample_state<=1;
 				end else begin
 					W_DMA_DATA<= I_DMA_DATA ;
 				end
@@ -141,13 +142,13 @@ begin
 				sample <= (sample == W_DIV-1) ? 12'b0 : sample + 1'b1;
 		
 				if (sample == W_DIV-1) begin
-					sample_state=0;
+					sample_state<=0;
 					//W_SAMPL <= W_DMA_DATA[23:8];
 					if (bits_per_sample==16) begin
 						//W_SAMPL <= {W_SAMPLE_TOP,W_DMA_DATA};
 						W_SAMPL <= {W_DMA_DATA,W_SAMPLE_TOP};
 					end else begin
-						W_SAMPL <= W_DMA_DATA[7:0];
+						W_SAMPL <= {8'b0,W_DMA_DATA[7:0]};
 					end
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
