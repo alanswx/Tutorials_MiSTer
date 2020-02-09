@@ -337,9 +337,10 @@ assign AUDIO_L = audio_l;
 assign AUDIO_R = audio_r;
 assign AUDIO_S = 0; 
 
+wire [7:0] debug;
 wire [9:0] probe_0= {1'b0,rom_a_two[7:4],1'b0,rom_a_two[3:0]};
 //wire [9:0] probe_1= {2'b0,rom_d};
-wire [9:0] probe_1= {1'b0,4'b1111,1'b0,4'b1111};
+wire [9:0] probe_1= {1'b0,debug[7:4],1'b0,debug[3:0]};
 
 wire de;
 
@@ -434,13 +435,14 @@ wave_sound wave_sound
         .I_CLK(clk_sys),
 		  .I_CLK_SPEED('d24000000),
         .I_RSTn(~reset),
-        .I_H_CNT(4'b0001), // used to interleave data reads
+        .I_H_CNT(hcnt[3:0]), // used to interleave data reads
         .I_DMA_TRIG(btn0_up),
         .I_DMA_STOP(1'b0),
-        .I_DMA_CHAN(3'b0), // 8 channels
+        .I_DMA_CHAN(3'b1), // 8 channels
         .I_DMA_ADDR(16'b0),
         .I_DMA_DATA(rom_d_two), // Data coming back from wave ROM
         .O_DMA_ADDR(rom_a_two), // output address to wave ROM
+		  .debug(debug),
         .O_SND(short_audio)
 );
 

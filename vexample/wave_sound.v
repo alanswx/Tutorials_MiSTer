@@ -20,9 +20,11 @@ module wave_sound
 	input		[7:0]I_DMA_DATA, // Data coming back from wave ROM
 
 	output	[16:0]O_DMA_ADDR, // output address to wave ROM
+	output   [7:0] debug,
 	output	signed [15:0]O_SND
 );
 
+reg [7:0] byte_0;
 reg [11:0]W_DIV;
 reg [16:0]W_DMA_ADDR;
 reg [15:0]W_DMA_LEN;
@@ -41,6 +43,7 @@ reg [15:0] block_align;
 reg [15:0] bits_per_sample;
 reg [31:0] data_size;
 
+assign debug=byte_0;
 
 always@(posedge I_CLK or negedge I_RSTn)
 begin
@@ -69,6 +72,8 @@ begin
 			W_DMA_DATA	<= 0;
 			W_SAMPLE_TOP <=0;
 			sample		<= 0;
+			inheader <= 1'b1;
+			byte_0 <=0;
 
 		end else if (W_DMA_EN == 1'b1) begin
 
@@ -111,12 +116,23 @@ begin
 								$display("block_align%x %d\n",block_align,block_align);
 								$display("bits_per_sample %x %d\n",bits_per_sample,bits_per_sample);
 								$display("data_size %x %d\n",data_size,data_size);
-								data_size <= data_size + 44;
 								$display("data_size %x %d\n",data_size,data_size);
-								W_DMA_LEN<=data_size[15:0];
-								W_DIV <= I_CLK_SPEED / sample_rate;
+								W_DMA_LEN<=data_size[15:0]+44;
 								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
 								inheader <= 1'b0;
+								bits_per_sample<=16'd16;
+								byte_0 <= bits_per_sample[7:0];
+								// for 24Mhz -- we should lookup the clock as well
+								//W_DIV <= I_CLK_SPEED / sample_rate; -- dont' divide in verilog
+								case (sample_rate)
+									'd44100: W_DIV<=32'd544;
+									'd48000: W_DIV<=32'd535;
+									'd32000: W_DIV<=32'd750;
+									'd22050: W_DIV<=32'd1088;
+									'd11025: W_DIV<=32'd2177;
+									'd8000:  W_DIV<=32'd3000;
+									default: W_DIV<=32'd3000;
+									endcase
 							end
 					endcase
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
