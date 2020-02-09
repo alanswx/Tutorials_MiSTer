@@ -59,7 +59,7 @@ wire [7:0]  ioctl_index;
 
 wire [15:0] joy0,joy1;
 
-wire[9:0] hcnt;
+reg [9:0] hcnt;
 soc soc (
    .reset(reset),
    .pixel_clock(clk_vid),
@@ -80,21 +80,30 @@ wire [7:0] ld;
 ////////////////////////////  MEMORY  ///////////////////////////////////
 reg    [16:0]rom_a_two;
 wire   [7:0]rom_d_two;
+wire  [15:0] sound_out;
 
 wave_sound wave_sound
 (
         .I_CLK(clk_sys),
         .I_CLK_SPEED('d2000000),
         .I_RSTn(~reset),
-        .I_H_CNT(4'b0001), // used to interleave data reads
+        .I_H_CNT(hcnt[3:0]), // used to interleave data reads
         .I_DMA_TRIG(start),
         .I_DMA_STOP(1'b0),
-        .I_DMA_CHAN(3'b0), // 8 channels
+        .I_DMA_CHAN(3'b1), // 8 channels
         .I_DMA_ADDR(17'b0),
         .I_DMA_DATA(rom_d_two), // Data coming back from wave ROM
         .O_DMA_ADDR(rom_a_two), // output address to wave ROM
-        .O_SND()
+        .O_SND(sound_out)
 );
+reg [15:0] last_sound ;
+always @(sound_out) begin
+	if (sound_out!=last_sound) begin
+		last_sound=sound_out;
+		$display("sound_out: %x\n",sound_out);
+	end
+end
+
 
 dpram_dc #(8,17) rom
 (

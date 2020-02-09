@@ -41,7 +41,6 @@ reg [15:0] block_align;
 reg [15:0] bits_per_sample;
 reg [31:0] data_size;
 
-reg sample_state;
 
 always@(posedge I_CLK or negedge I_RSTn)
 begin
@@ -54,7 +53,6 @@ begin
 		W_DMA_ADDR		<= 0;
 		W_DMA_TRIG		<= 0;
 		sample			<= 0;
-		sample_state		<= 0;
 		inheader <= 1'b1;
 	 
 	end else begin
@@ -83,31 +81,30 @@ begin
 					W_DMA_DATA <= I_DMA_DATA ;
 					$display("W_DMA_CNT %x W_DMA_DATA %x %c\n",W_DMA_CNT,W_DMA_DATA,W_DMA_DATA);
 					case (W_DMA_CNT)
-						'd02: ; // R
-						'd03: ; // I
+						'd01: ; // R
+						'd02: ; // I
+						'd03: ; // F
 						'd04: ; // F
-						'd05: ; // F
-						'd24: num_channels[7:0]  <= W_DMA_DATA ;
-						'd25: num_channels[15:8] <= W_DMA_DATA;
-						'd26: sample_rate[7:0]   <= W_DMA_DATA;
-						'd27: sample_rate[15:8]  <= W_DMA_DATA;
-						'd28: sample_rate[23:16] <= W_DMA_DATA;
-						'd29: sample_rate[31:24] <= W_DMA_DATA;
-						'd30: byte_rate[7:0]   <= W_DMA_DATA;
-						'd31: byte_rate[15:8]  <= W_DMA_DATA;
-						'd32: byte_rate[23:16] <= W_DMA_DATA;
-						'd33: byte_rate[31:24] <= W_DMA_DATA;
-						'd34: block_align[7:0]  <= W_DMA_DATA ;
-						'd35: block_align[15:8] <= W_DMA_DATA;
-						'd36: bits_per_sample[7:0]  <= W_DMA_DATA ;
-						'd37: bits_per_sample[15:8] <= W_DMA_DATA;
-						'd42: data_size[7:0]  <= W_DMA_DATA;
-						'd43: data_size[15:8] <= W_DMA_DATA;
-						'd44: data_size[23:16] <= W_DMA_DATA;
-						'd45: 
+						'd23: num_channels[7:0]  <= W_DMA_DATA ;
+						'd24: num_channels[15:8] <= W_DMA_DATA;
+						'd25: sample_rate[7:0]   <= W_DMA_DATA;
+						'd26: sample_rate[15:8]  <= W_DMA_DATA;
+						'd27: sample_rate[23:16] <= W_DMA_DATA;
+						'd28: sample_rate[31:24] <= W_DMA_DATA;
+						'd29: byte_rate[7:0]   <= W_DMA_DATA;
+						'd30: byte_rate[15:8]  <= W_DMA_DATA;
+						'd31: byte_rate[23:16] <= W_DMA_DATA;
+						'd32: byte_rate[31:24] <= W_DMA_DATA;
+						'd33: block_align[7:0]  <= W_DMA_DATA ;
+						'd34: block_align[15:8] <= W_DMA_DATA;
+						'd35: bits_per_sample[7:0]  <= W_DMA_DATA ;
+						'd36: bits_per_sample[15:8] <= W_DMA_DATA;
+						'd41: data_size[7:0]  <= W_DMA_DATA;
+						'd42: data_size[15:8] <= W_DMA_DATA;
+						'd43: data_size[23:16] <= W_DMA_DATA;
+						'd44: 
 							begin 
 								data_size[31:24] <= W_DMA_DATA; 
-								inheader <= 1'b0;
 								$display("num_channels %x %d\n",num_channels,num_channels);
 								$display("sample_rate %x %d\n",sample_rate,sample_rate);
 								$display("byte_rate %x %d\n",byte_rate,byte_rate);
@@ -118,18 +115,21 @@ begin
 								$display("data_size %x %d\n",data_size,data_size);
 								W_DMA_LEN<=data_size[15:0];
 								W_DIV <= I_CLK_SPEED / sample_rate;
-								sample_state <= 0;
+								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
+								inheader <= 1'b0;
 							end
 					endcase
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 				end
-				
-				if (inheader==0 && bits_per_sample==16'd16 && sample_state ==0) 
+				else if ( bits_per_sample==16'd16 && W_DMA_ADDR[0]==1'b0)
 				begin
 					W_SAMPLE_TOP<=I_DMA_DATA;
-					sample_state<=1;
+$display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
+					W_DMA_CNT <= W_DMA_CNT + 1'd1;
+					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 				end else begin
+$display("grab dms_data %x %x %x %x %d",W_DMA_ADDR,I_DMA_DATA,sample,W_DIV,bits_per_sample);
 					W_DMA_DATA<= I_DMA_DATA ;
 				end
 
@@ -142,7 +142,6 @@ begin
 				sample <= (sample == W_DIV-1) ? 12'b0 : sample + 1'b1;
 		
 				if (sample == W_DIV-1) begin
-					sample_state<=0;
 					//W_SAMPL <= W_DMA_DATA[23:8];
 					if (bits_per_sample==16) begin
 						//W_SAMPL <= {W_SAMPLE_TOP,W_DMA_DATA};
@@ -150,6 +149,7 @@ begin
 					end else begin
 						W_SAMPL <= {8'b0,W_DMA_DATA[7:0]};
 					end
+				$display("w_SAMPL: %x addr %x",W_SAMPL,W_DMA_ADDR);	
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
 					W_DMA_EN <= (W_DMA_CNT==W_DMA_LEN) || I_DMA_STOP ? 1'b0 : 1'b1;
