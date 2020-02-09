@@ -118,7 +118,7 @@ begin
 								$display("data_size %x %d\n",data_size,data_size);
 								$display("data_size %x %d\n",data_size,data_size);
 								$display("data_size %x %d\n",data_size[15:0],data_size[15:0]);
-								W_DMA_LEN<=data_size[15:0]+16'd44;
+								W_DMA_LEN<=data_size[15:0]+16'd45; // needs to be odd 
 								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
 								inheader <= 1'b0;
 								bits_per_sample<=16'd16;
