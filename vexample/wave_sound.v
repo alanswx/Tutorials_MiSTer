@@ -90,23 +90,23 @@ begin
 						'd02: ; // I
 						'd03: ; // F
 						'd04: ; // F
-						'd23: num_channels[7:0]  <= W_DMA_DATA ;
-						'd24: num_channels[15:8] <= W_DMA_DATA;
-						'd25: sample_rate[7:0]   <= W_DMA_DATA;
-						'd26: sample_rate[15:8]  <= W_DMA_DATA;
-						'd27: sample_rate[23:16] <= W_DMA_DATA;
-						'd28: sample_rate[31:24] <= W_DMA_DATA;
-						'd29: byte_rate[7:0]   <= W_DMA_DATA;
-						'd30: byte_rate[15:8]  <= W_DMA_DATA;
-						'd31: byte_rate[23:16] <= W_DMA_DATA;
-						'd32: byte_rate[31:24] <= W_DMA_DATA;
-						'd33: block_align[7:0]  <= W_DMA_DATA ;
-						'd34: block_align[15:8] <= W_DMA_DATA;
-						'd35: bits_per_sample[7:0]  <= W_DMA_DATA ;
-						'd36: bits_per_sample[15:8] <= W_DMA_DATA;
-						'd41: data_size[7:0]  <= W_DMA_DATA;
-						'd42: data_size[15:8] <= W_DMA_DATA;
-						'd43: data_size[23:16] <= W_DMA_DATA;
+						'd23: num_channels[7:0]  <= I_DMA_DATA ;
+						'd24: num_channels[15:8] <= I_DMA_DATA;
+						'd25: sample_rate[7:0]   <= I_DMA_DATA;
+						'd26: sample_rate[15:8]  <= I_DMA_DATA;
+						'd27: sample_rate[23:16] <= I_DMA_DATA;
+						'd28: sample_rate[31:24] <= I_DMA_DATA;
+						'd29: byte_rate[7:0]   <= I_DMA_DATA;
+						'd30: byte_rate[15:8]  <= I_DMA_DATA;
+						'd31: byte_rate[23:16] <= I_DMA_DATA;
+						'd32: byte_rate[31:24] <= I_DMA_DATA;
+						'd33: block_align[7:0]  <= I_DMA_DATA ;
+						'd34: block_align[15:8] <= I_DMA_DATA;
+						'd35: bits_per_sample[7:0]  <= I_DMA_DATA ;
+						'd36: bits_per_sample[15:8] <= I_DMA_DATA;
+						'd41: data_size[7:0]  <= I_DMA_DATA;
+						'd42: data_size[15:8] <= I_DMA_DATA;
+						'd43: data_size[23:16] <= I_DMA_DATA;
 						'd44: 
 							begin 
 								data_size[31:24] <= W_DMA_DATA; 
@@ -121,7 +121,6 @@ begin
 								W_DMA_LEN<=data_size[15:0]+16'd45; // needs to be odd 
 								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
 								inheader <= 1'b0;
-								bits_per_sample<=16'd16;
 								byte_0 <= bits_per_sample[7:0];
 								// for 24Mhz -- we should lookup the clock as well
 								//W_DIV <= I_CLK_SPEED / sample_rate; -- dont' divide in verilog
