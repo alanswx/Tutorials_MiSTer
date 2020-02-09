@@ -1053,8 +1053,8 @@ printf("start\n");
 }
 
 void start_load_wav() {
-printf("load wav 00 here\n");
- ioctl_download_setfile("../romextract/00.wav",1);
+printf("load wav 01 here\n");
+ ioctl_download_setfile("../romextract/01.wav",1);
 }
 void start_load_cart_3() {
 printf("load cart here\n");
@@ -1355,7 +1355,7 @@ int main(int argc, char** argv, char** env) {
 		if (ImGui::Button("RESET")) main_time = 0;
 		if (ImGui::Button("LOAD JOURNEY")) start_load_journey();
 		if (ImGui::Button("Start Audio")) start_audio();
-		ImGui::SameLine(); if (ImGui::Button("LOAD WAV 00")) start_load_wav();
+		ImGui::SameLine(); if (ImGui::Button("LOAD WAV 01")) start_load_wav();
 		//ImGui::SameLine(); if (ImGui::Button("LOAD CART POLE")) start_load_cart_2();
 		//ImGui::SameLine(); if (ImGui::Button("LOAD CART DIAG")) start_load_cart_3();
 		ImGui::Text("main_time %d", main_time);

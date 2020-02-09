@@ -117,7 +117,8 @@ begin
 								$display("bits_per_sample %x %d\n",bits_per_sample,bits_per_sample);
 								$display("data_size %x %d\n",data_size,data_size);
 								$display("data_size %x %d\n",data_size,data_size);
-								W_DMA_LEN<=data_size[15:0]+44;
+								$display("data_size %x %d\n",data_size[15:0],data_size[15:0]);
+								W_DMA_LEN<=data_size[15:0]+16'd44;
 								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
 								inheader <= 1'b0;
 								bits_per_sample<=16'd16;
@@ -125,14 +126,14 @@ begin
 								// for 24Mhz -- we should lookup the clock as well
 								//W_DIV <= I_CLK_SPEED / sample_rate; -- dont' divide in verilog
 								case (sample_rate)
-									'd44100: W_DIV<=32'd544;
-									'd48000: W_DIV<=32'd535;
-									'd32000: W_DIV<=32'd750;
-									'd22050: W_DIV<=32'd1088;
-									'd11025: W_DIV<=32'd2177;
-									'd8000:  W_DIV<=32'd3000;
-									default: W_DIV<=32'd3000;
-									endcase
+									'd44100: W_DIV<=12'd544;
+									'd48000: W_DIV<=12'd535;
+									'd32000: W_DIV<=12'd750;
+									'd22050: W_DIV<=12'd1088;
+									'd11025: W_DIV<=12'd2177;
+									'd8000:  W_DIV<=12'd3000;
+									default: W_DIV<=12'd3000;
+								endcase
 							end
 					endcase
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
@@ -141,11 +142,12 @@ begin
 				else if ( bits_per_sample==16'd16 && W_DMA_ADDR[0]==1'b0)
 				begin
 					W_SAMPLE_TOP<=I_DMA_DATA;
+$display("W_DMA_CNT %d W_DMA_LEN %d W_DIV %d W_DMA_EN %x ",W_DMA_CNT,W_DMA_LEN,W_DIV,W_DMA_EN);
 $display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 				end else begin
-$display("grab dms_data %x %x %x %x %d",W_DMA_ADDR,I_DMA_DATA,sample,W_DIV,bits_per_sample);
+//$display("grab dms_data %x %x %x %x %d",W_DMA_ADDR,I_DMA_DATA,sample,W_DIV,bits_per_sample);
 					W_DMA_DATA<= I_DMA_DATA ;
 				end
 
