@@ -84,7 +84,7 @@ begin
 
 			// Prefetch sample.
 			if (I_H_CNT == {I_DMA_CHAN,1'b1}) begin
-				div=~div;
+				div<=~div;
 				if (div) begin
 				
 				if (inheader==1'b1) begin
