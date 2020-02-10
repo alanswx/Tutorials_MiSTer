@@ -27,10 +27,10 @@ module wave_sound
 reg [7:0] byte_0;
 reg [11:0]W_DIV;
 reg [16:0]W_DMA_ADDR;
-reg [15:0]W_DMA_LEN;
+reg [16:0]W_DMA_LEN;
 reg signed [7:0]W_DMA_DATA;
 reg signed [7:0]W_SAMPLE_TOP;
-reg [15:0]W_DMA_CNT;
+reg [16:0]W_DMA_CNT;
 reg W_DMA_EN = 1'b0;
 reg [11:0]sample;
 reg W_DMA_TRIG;
@@ -124,7 +124,7 @@ begin
 								$display("data_size %x %d\n",data_size,data_size);
 								$display("data_size %x %d\n",data_size,data_size);
 								$display("data_size %x %d\n",data_size[15:0],data_size[15:0]);
-								W_DMA_LEN<=data_size[15:0]+16'd45; // needs to be odd 
+								W_DMA_LEN<=data_size[16:0]+16'd45; // needs to be odd 
 								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
 								inheader <= 1'b0;
 								byte_0 <= bits_per_sample[7:0];
