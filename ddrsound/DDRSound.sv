@@ -487,9 +487,9 @@ ddram ddram
 	.addr((ioctl_download & wav_load) ? ioctl_addr :   wav_addr),
 //	.addr((ioctl_download & tap_load) ? ioctl_addr : tap_play_addr),
 	.dout(wav_data),
-	.din(ioctl_dout),
+	.din(ioctl_data),
 	.we(wav_wr),
-	.rd(wav_rd & wav_data_ready),
+	.rd(wav_rd),
 	.ready(wav_data_ready)
 );
 
@@ -500,6 +500,7 @@ ddram ddram
 //
 // NOTE: the wav_wr (we) line doesn't want to stay high. It needs to be high to start, and then can't go high until wav_data_ready
 // we hold the ioctl_wait high (stop the data from HPS) until we get waV_data_ready
+
 
 
 reg wav_wr;
@@ -520,9 +521,17 @@ always @(posedge clk_sys) begin
 end
 
 
-
+reg wav_rd;
+always @(posedge clk_sys) begin
+	wav_rd<=0;
+	if (wav_want_byte && wav_data_ready) begin
+		wav_rd<=1;
+	end
+end
+		
 reg    [27:0]wav_addr;
 wire   [7:0]wav_data;
+wire wav_want_byte;
 
 wave_sound wave_sound
 (
@@ -536,7 +545,7 @@ wave_sound wave_sound
         .I_DMA_ADDR(16'b0),
         .I_DMA_DATA(wav_data), // Data coming back from wave ROM
         .O_DMA_ADDR(wav_addr), // output address to wave ROM
-        .O_DMA_READ(wav_rd), // read a byte
+        .O_DMA_READ(wav_want_byte), // read a byte
         .I_DMA_READY(wav_data_ready), // read a byte
         .debug(debug),
         .O_SND(short_audio)
