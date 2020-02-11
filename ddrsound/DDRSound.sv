@@ -113,7 +113,7 @@ assign HDMI_ARY = status[1] ? 8'd9  : 8'd3;
 `include "build_id.v" 
 localparam CONF_STR = {
 	"SOUND;;",
-	"F,romwav;",
+	"F1,wav;",
 	"H0O1,Aspect Ratio,Original,Wide;",
 	"H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
@@ -353,7 +353,7 @@ assign AUDIO_R = audio_r;
 assign AUDIO_S = 1; 
 
 wire [7:0] debug;
-wire [9:0] probe_0= {1'b0,rom_a_two[7:4],1'b0,rom_a_two[3:0]};
+wire [9:0] probe_0= {1'b0,wav_addr[7:4],1'b0,wav_addr[3:0]};
 //wire [9:0] probe_1= {2'b0,rom_d};
 wire [9:0] probe_1= {1'b0,debug[7:4],1'b0,debug[3:0]};
 
@@ -430,7 +430,7 @@ soc soc(
         .o_onup(btn1_up)
     );
 
-wire reset = status[0] | buttons[1] |ioctl_download; 
+wire reset = status[0] | buttons[1] ; 
 
 
 
@@ -448,47 +448,97 @@ assign audio_r = audio_l;
 ////////////////////////////  DDRAM  ///////////////////////////////////
 //
 //
+/*
 assign DDRAM_CLK = clk_sys;
+
 
 //wire [7:0] ext_dout;
 wire       ext_ready;
 wire       ext_rd;
 wire [27:0] extaddr = rom_a_two;
-assign ioctl_wait = ioctl_download && !ioctl_index && ~ext_ready;
+
+always @(posedge clk_sys) begin
+   ioctl_wait <= ioctl_download  && ~ext_ready;
+end
+
+//assign ioctl_wait = ioctl_download  && ~ext_ready;
 ddram ext_rom
 (
 	.*,
-	.addr((ioctl_download && !ioctl_index) ? ioctl_addr :   extaddr),
+	//.addr((ioctl_download && !ioctl_index) ? ioctl_addr :   extaddr),
+	.addr((ioctl_download) ? ioctl_addr :   extaddr),
 
 	.din(ioctl_data),
-	.we(!ioctl_index),
+	.we(ioctl_download),
 
 	.dout(rom_d_two),
 	.rd(ext_rd),
 
 	.ready(ext_ready)
 );
+*/
+
+wire       wav_load = (ioctl_index == 1);
+
+assign DDRAM_CLK = clk_sys;
+ddram ddram
+(
+	.*,
+	.addr((ioctl_download & wav_load) ? ioctl_addr :   wav_addr),
+//	.addr((ioctl_download & tap_load) ? ioctl_addr : tap_play_addr),
+	.dout(wav_data),
+	.din(ioctl_dout),
+	.we(wav_wr),
+	.rd(wav_rd & wav_data_ready),
+	.ready(wav_data_ready)
+);
 
 
 
-reg    [27:0]rom_a_two;
-wire   [7:0]rom_d_two;
+//
+//  signals for DDRAM
+//
+// NOTE: the wav_wr (we) line doesn't want to stay high. It needs to be high to start, and then can't go high until wav_data_ready
+// we hold the ioctl_wait high (stop the data from HPS) until we get waV_data_ready
+
+
+reg wav_wr;
+always @(posedge clk_sys) begin
+	reg old_reset;
+
+	old_reset <= reset;
+	if(~old_reset && reset) ioctl_wait <= 0;
+
+	wav_wr <= 0;
+	if(ioctl_wr & wav_load) begin
+		ioctl_wait <= 1;
+		wav_wr <= 1;
+	end
+	else if(~wav_wr & ioctl_wait & wav_data_ready) begin
+		ioctl_wait <= 0;
+	end
+end
+
+
+
+reg    [27:0]wav_addr;
+wire   [7:0]wav_data;
 
 wave_sound wave_sound
 (
         .I_CLK(clk_sys),
-	.I_CLK_SPEED('d24000000),
+        .I_CLK_SPEED('d24000000),
         .I_RSTn(~reset),
         .I_H_CNT(hcnt[3:0]), // used to interleave data reads
         .I_DMA_TRIG(btn0_up),
         .I_DMA_STOP(1'b0),
         .I_DMA_CHAN(3'b1), // 8 channels
         .I_DMA_ADDR(16'b0),
-        .I_DMA_DATA(rom_d_two), // Data coming back from wave ROM
-        .O_DMA_ADDR(rom_a_two), // output address to wave ROM
-	.O_DMA_READ(ext_rd), // read a byte
-	.I_DMA_READY(ext_ready), // read a byte
-	.debug(debug),
+        .I_DMA_DATA(wav_data), // Data coming back from wave ROM
+        .O_DMA_ADDR(wav_addr), // output address to wave ROM
+        .O_DMA_READ(wav_rd), // read a byte
+        .I_DMA_READY(wav_data_ready), // read a byte
+        .debug(debug),
         .O_SND(short_audio)
 );
 
