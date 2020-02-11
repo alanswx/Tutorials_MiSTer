@@ -485,11 +485,10 @@ ddram ddram
 (
 	.*,
 	.addr((ioctl_download & wav_load) ? ioctl_addr :   wav_addr),
-//	.addr((ioctl_download & tap_load) ? ioctl_addr : tap_play_addr),
 	.dout(wav_data),
 	.din(ioctl_data),
 	.we(wav_wr),
-	.rd(wav_rd),
+	.rd(wav_want_byte),
 	.ready(wav_data_ready)
 );
 
@@ -521,13 +520,7 @@ always @(posedge clk_sys) begin
 end
 
 
-reg wav_rd;
-always @(posedge clk_sys) begin
-	wav_rd<=0;
-	if (wav_want_byte && wav_data_ready) begin
-		wav_rd<=1;
-	end
-end
+
 		
 reg    [27:0]wav_addr;
 wire   [7:0]wav_data;

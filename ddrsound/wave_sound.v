@@ -88,7 +88,7 @@ begin
 
 			// Prefetch sample.
 			if (I_H_CNT == {I_DMA_CHAN,1'b1}) begin
-				O_DMA_READ <=1;
+				O_DMA_READ <=0;
 				div<=~div;
 				if (div) begin
 				
@@ -148,6 +148,7 @@ begin
 					endcase
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
+					O_DMA_READ <= 1;
 				end
 				else if ( bits_per_sample==16'd16 && W_DMA_ADDR[0]==1'b0 && I_DMA_READY)
 				begin
@@ -157,8 +158,7 @@ $display("W_DMA_CNT %d W_DMA_LEN %d W_DIV %d W_DMA_EN %x ",W_DMA_CNT,W_DMA_LEN,W
 $display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
-				end else begin
-					O_DMA_READ <=1;
+				end else if (I_DMA_READY) begin
 //$display("grab dms_data %x %x %x %x %d",W_DMA_ADDR,I_DMA_DATA,sample,W_DIV,bits_per_sample);
 					W_DMA_DATA<= I_DMA_DATA ;
 				end
@@ -167,7 +167,7 @@ $display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
 			end
 			end
 			
-			if(inheader==0 ) begin	
+			if(inheader==0) begin	
 			
 
 				sample <= (sample == W_DIV-1) ? 12'b0 : sample + 1'b1;
@@ -183,6 +183,7 @@ $display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
 				$display("w_SAMPL: %x addr %x",W_SAMPL,W_DMA_ADDR);	
 					W_DMA_ADDR <= W_DMA_ADDR + 1'd1;
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
+					O_DMA_READ<=1;
 					W_DMA_EN <= (W_DMA_CNT==W_DMA_LEN) || I_DMA_STOP ? 1'b0 : 1'b1;
 				end
 			end  
