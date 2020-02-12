@@ -396,7 +396,7 @@ soc soc(
 
 
 
-  reg toggle_switch=1'b0;
+  reg toggle_switch=1'b1;
   
  always @(posedge clk_sys) begin
    if (btn1_up==1'b1) 
