@@ -18,9 +18,10 @@ module wave_sound
 	input		[2:0]I_DMA_CHAN, // 8 channels
 	input		[27:0]I_DMA_ADDR,
 	input		[7:0]I_DMA_DATA, // Data coming back from wave ROM
-        input		I_DMA_READY,  // data is ready
-	output          O_DMA_READ,  // read a byte
-
+   input		I_DMA_READY,  // data is ready
+	input    I_PAUSE,
+	
+	output   O_DMA_READ,  // read a byte
 	output	[27:0]O_DMA_ADDR, // output address to wave ROM
 	output   [7:0] debug,
 	output	signed [15:0]O_SND
@@ -167,7 +168,7 @@ $display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
 			end
 			end
 			
-			if(inheader==0) begin	
+			if(inheader==0  && I_PAUSE==0) begin	
 			
 
 				sample <= (sample == W_DIV-1) ? 12'b0 : sample + 1'b1;

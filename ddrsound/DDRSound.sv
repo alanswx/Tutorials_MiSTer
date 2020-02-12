@@ -324,27 +324,8 @@ arcade_video #(256,224,24) arcade_video
 	.fx(status[5:3])
 );
 
-/*
-arcade_video #(256,224,9) arcade_video
-(
-	.*,
 
-	.clk_video(clk_48),
 
-	//.RGB_in({r,g,b}),
-	.RGB_in({r[7:5],g[7:5],b[7:5]}),
-	//.RGB_in({3'b111,3'b0,3'b0}),
-	.HBlank(hblank),
-	.VBlank(vblank),
-	.HSync(hs),
-	.VSync(vs),
-	.forced_scandoubler(0),
-
-	.no_rotate(1),
-	.rotate_ccw(0),
-	.fx(status[5:3])
-);
-*/
 
 wire [15:0] audio_l;
 wire [15:0] audio_r;
@@ -353,13 +334,24 @@ assign AUDIO_R = audio_r;
 assign AUDIO_S = 1; 
 
 wire [7:0] debug;
-wire [9:0] probe_0= {1'b0,wav_addr[7:4],1'b0,wav_addr[3:0]};
+wire [44:0] probe_0= {
+   1'b0,wav_addr[27:24],
+   1'b0,wav_addr[23:20],
+   1'b0,wav_addr[19:16],
+   1'b0,wav_addr[15:12],
+   1'b0,wav_addr[11:8],
+   1'b0,wav_addr[7:4],
+	1'b0,wav_addr[3:0],
+	5'h10,
+	toggle_switch? 5'h12:5'h13
+	};
+	
 //wire [9:0] probe_1= {2'b0,rom_d};
-wire [9:0] probe_1= {1'b0,debug[7:4],1'b0,debug[3:0]};
+wire [45:0] probe_1= {36'b0,1'b0,debug[7:4],1'b0,debug[3:0]};
 
 wire de;
 
-ovo #(.COLS(2), .LINES(2), .RGB(24'hFF00FF)) diff (
+ovo #(.COLS(9), .LINES(2), .RGB(24'hFF00FF)) diff (
         .i_r(r),
         .i_g(g),
         .i_b(b),
@@ -407,7 +399,7 @@ soc soc(
   reg toggle_switch=1'b0;
   
  always @(posedge clk_sys) begin
-   if (btn0_up==1'b1) 
+   if (btn1_up==1'b1) 
     toggle_switch<=~toggle_switch;
   
  end
@@ -424,7 +416,7 @@ soc soc(
   wire btn1_state, btn1_dn, btn1_up;
     debounce d_btn1 (
       .clk(clk_sys),
-      .i_btn(btn_down),
+      .i_btn(btn_fire),
         .o_state(btn1_state),
         .o_ondn(btn1_dn),
         .o_onup(btn1_up)
@@ -448,35 +440,7 @@ assign audio_r = audio_l;
 ////////////////////////////  DDRAM  ///////////////////////////////////
 //
 //
-/*
-assign DDRAM_CLK = clk_sys;
 
-
-//wire [7:0] ext_dout;
-wire       ext_ready;
-wire       ext_rd;
-wire [27:0] extaddr = rom_a_two;
-
-always @(posedge clk_sys) begin
-   ioctl_wait <= ioctl_download  && ~ext_ready;
-end
-
-//assign ioctl_wait = ioctl_download  && ~ext_ready;
-ddram ext_rom
-(
-	.*,
-	//.addr((ioctl_download && !ioctl_index) ? ioctl_addr :   extaddr),
-	.addr((ioctl_download) ? ioctl_addr :   extaddr),
-
-	.din(ioctl_data),
-	.we(ioctl_download),
-
-	.dout(rom_d_two),
-	.rd(ext_rd),
-
-	.ready(ext_ready)
-);
-*/
 
 wire       wav_load = (ioctl_index == 1);
 
@@ -537,6 +501,7 @@ wave_sound wave_sound
         .I_DMA_CHAN(3'b1), // 8 channels
         .I_DMA_ADDR(16'b0),
         .I_DMA_DATA(wav_data), // Data coming back from wave ROM
+		  .I_PAUSE(~toggle_switch),
         .O_DMA_ADDR(wav_addr), // output address to wave ROM
         .O_DMA_READ(wav_want_byte), // read a byte
         .I_DMA_READY(wav_data_ready), // read a byte
