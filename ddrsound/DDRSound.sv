@@ -498,7 +498,7 @@ wave_sound wave_sound
         .I_RSTn(~reset),
         .I_H_CNT(hcnt[3:0]), // used to interleave data reads
         .I_DMA_TRIG(btn0_up),
-        .I_DMA_STOP(1'b0),
+        .I_DMA_STOP(ioctl_download),
         .I_DMA_CHAN(3'b1), // 8 channels
         .I_DMA_ADDR(16'b0),
         .I_DMA_DATA(wav_data), // Data coming back from wave ROM
