@@ -20,6 +20,7 @@ module wave_sound
 	input		[7:0]I_DMA_DATA, // Data coming back from wave ROM
    input		I_DMA_READY,  // data is ready
 	input    I_PAUSE,
+	input    I_LOOP,
 	
 	output   O_DMA_READ,  // read a byte
 	output	[27:0]O_DMA_ADDR, // output address to wave ROM
@@ -45,6 +46,7 @@ reg [31:0] byte_rate;
 reg [15:0] block_align;
 reg [15:0] bits_per_sample;
 reg [31:0] data_size;
+reg [27:0] START_ADDR;
 
 reg div;
 
@@ -55,15 +57,15 @@ begin
   
 	if(! I_RSTn)begin
 
-		W_DMA_EN		<= 1'b0;
+		W_DMA_EN	      <= 1'b0;
 		W_DMA_CNT		<= 0;
 		W_DMA_DATA		<= 0;
 		W_DMA_ADDR		<= 0;
 		W_DMA_TRIG		<= 0;
 		sample			<= 0;
-		inheader <= 1'b1;
-		div<=0;
-		O_DMA_READ <=0;
+		inheader       <= 1'b1;
+		div            <=0;
+		O_DMA_READ     <=0;
 	 
 	end else begin
 
@@ -132,6 +134,7 @@ begin
 								$display("data_size %x %d\n",data_size[15:0],data_size[15:0]);
 								W_DMA_LEN<=data_size[27:0]+16'd45; // needs to be odd 
 								W_DMA_ADDR <= W_DMA_ADDR - 2'd2;
+								START_ADDR <= W_DMA_ADDR - 2'd2;
 								inheader <= 1'b0;
 								byte_0 <= bits_per_sample[7:0];
 								// for 24Mhz -- we should lookup the clock as well
@@ -186,6 +189,11 @@ $display("grab top %x %x %x",W_SAMPLE_TOP,W_DMA_ADDR,I_DMA_DATA);
 					W_DMA_CNT <= W_DMA_CNT + 1'd1;
 					O_DMA_READ<=1;
 					W_DMA_EN <= (W_DMA_CNT==W_DMA_LEN) || I_DMA_STOP ? 1'b0 : 1'b1;
+					if (W_DMA_CNT==W_DMA_LEN && I_LOOP) begin
+						W_DMA_EN<=1;
+						W_DMA_ADDR<=START_ADDR;
+						W_DMA_CNT<=0;
+					end
 				end
 			end  
 			

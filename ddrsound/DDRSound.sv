@@ -118,6 +118,8 @@ localparam CONF_STR = {
 	"H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
 	"-;",
+	"O7,Loop,No,Yes;",
+	"-;",
 	"R0,Reset;",
 	"J1,Fire,Start 1P,Start 2P,Coin,Cheat;",
 	"jn,A,Start,Select,R,L;",
@@ -396,12 +398,11 @@ soc soc(
 
 
 
-  reg toggle_switch=1'b1;
+reg toggle_switch=1'b1;
   
  always @(posedge clk_sys) begin
    if (btn1_up==1'b1) 
     toggle_switch<=~toggle_switch;
-  
  end
   
   wire btn0_state, btn0_dn, btn0_up;
@@ -505,6 +506,7 @@ wave_sound wave_sound
         .O_DMA_ADDR(wav_addr), // output address to wave ROM
         .O_DMA_READ(wav_want_byte), // read a byte
         .I_DMA_READY(wav_data_ready), // read a byte
+		  .I_LOOP(status[7]),
         .debug(debug),
         .O_SND(short_audio)
 );
