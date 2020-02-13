@@ -488,13 +488,13 @@ end
 
 		
 reg    [27:0]wav_addr;
-wire   [7:0]wav_data;
-wire wav_want_byte;
+wire   [7:0] wav_data;
+wire         wav_want_byte;
+wire         wav_data_ready;
 
 wave_sound wave_sound
 (
         .I_CLK(clk_sys),
-        .I_CLK_SPEED('d24000000),
         .I_RSTn(~reset),
         .I_H_CNT(hcnt[3:0]), // used to interleave data reads
         .I_DMA_TRIG(btn0_up),
@@ -502,11 +502,11 @@ wave_sound wave_sound
         .I_DMA_CHAN(3'b1), // 8 channels
         .I_DMA_ADDR(16'b0),
         .I_DMA_DATA(wav_data), // Data coming back from wave ROM
-		  .I_PAUSE(~toggle_switch),
+	.I_PAUSE(~toggle_switch),
         .O_DMA_ADDR(wav_addr), // output address to wave ROM
         .O_DMA_READ(wav_want_byte), // read a byte
         .I_DMA_READY(wav_data_ready), // read a byte
-		  .I_LOOP(status[7]),
+	.I_LOOP(status[7]),
         .debug(debug),
         .O_SND(short_audio)
 );
@@ -549,49 +549,3 @@ module debounce(
     assign o_onup = ~idle & max & o_state;
 endmodule
 
-module wav_player(
-    input CLK,
-    input switch_play,
-  output reg [7:0] audio_out,
-  output reg [13:0]rom_a,
-  input [7:0]rom_d,
-  output reg play
-    );
-
-wire s_start=switch_play;
-//reg play = 0;
-reg [11:0] prescaler=0; 
-reg [13:0] address=0;
-reg [7:0] value;
-
-reg [15:0] data;
-
-always @(posedge CLK)
-begin
-  if (play)
-  begin
-    prescaler <= prescaler + 1;
-    /*if (prescaler == 12'd1)  
-    begin
-    end
-    */
-    if (prescaler == 12'd2177)  // 8kHz x 256 steps = 2.048 MHz
-    begin
-      prescaler <= 0;
-      rom_a<=address;
-      audio_out <= rom_d;
-      address <= address + 1;
-      if (address == 14'h3fff )
-      begin
-        play <= 0;
-        address <= 0;
-      end			  
-    end
-  end
-  if (s_start)
-  begin
-    play <= 1;
-  end	 
-end
-
-endmodule 

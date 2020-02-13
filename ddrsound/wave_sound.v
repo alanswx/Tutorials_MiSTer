@@ -10,7 +10,6 @@
 module wave_sound
 (
 	input		I_CLK,
-	input    [31:0] I_CLK_SPEED,
 	input		I_RSTn,
 	input		[3:0]I_H_CNT, // used to interleave data reads
 	input		I_DMA_TRIG,
@@ -18,14 +17,14 @@ module wave_sound
 	input		[2:0]I_DMA_CHAN, // 8 channels
 	input		[27:0]I_DMA_ADDR,
 	input		[7:0]I_DMA_DATA, // Data coming back from wave ROM
-   input		I_DMA_READY,  // data is ready
-	input    I_PAUSE,
-	input    I_LOOP,
+	input		I_DMA_READY,  // data is ready
+	input		I_PAUSE,
+	input		I_LOOP,
 	
-	output   O_DMA_READ,  // read a byte
-	output	[27:0]O_DMA_ADDR, // output address to wave ROM
-	output   [7:0] debug,
-	output	signed [15:0]O_SND
+	output		O_DMA_READ,  // read a byte
+	output		[27:0]O_DMA_ADDR, // output address to wave ROM
+	output		[7:0] debug,
+	output	signed  [15:0]O_SND
 );
 
 reg [7:0] byte_0;
