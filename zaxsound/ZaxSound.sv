@@ -443,7 +443,8 @@ wire reset = status[0] | buttons[1] |ioctl_download;
 
 wire [7:0] short_audio;
 wire [7:0] short_audio_two;
-assign audio_l = {1'b0,short_audio,7'b0} +  {1'b0,short_audio_two,7'b0};
+wire [7:0] short_audio_three;
+assign audio_l = {1'b0,short_audio,7'b0} +  {1'b0,short_audio_three,7'b0};
 assign audio_r = {1'b0,short_audio_two,7'b0};
 
 /*
@@ -481,6 +482,13 @@ dkongjr_wav_sound one_sound
         .I_DMA_DATA({7'b0,rom_d}),
         .O_DMA_ADDR(rom_a),
         .O_SND(short_audio)
+);
+
+zaxxon_discrete_sound zaxsound  (
+        .clk_sys(clk_sys),
+	.reset(reset),
+	.trig(8'd0),
+	.short_audio(short_audio_three)
 );
 
 
