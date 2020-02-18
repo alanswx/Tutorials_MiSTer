@@ -329,11 +329,6 @@ arcade_video #(256,224,24) arcade_video
 
 
 
-wire [15:0] audio_l;
-wire [15:0] audio_r;
-assign AUDIO_L = audio_l;
-assign AUDIO_R = audio_r;
-assign AUDIO_S = 1; 
 
 wire [7:0] debug;
 wire [44:0] probe_0= {
@@ -427,9 +422,10 @@ wire reset = status[0] | buttons[1] ;
 
 
 
-wire [15:0] short_audio;
-assign audio_l  = short_audio;
-assign audio_r = audio_l;
+wire [15:0] audio_l, audio_r;
+assign AUDIO_S = 1;
+assign AUDIO_L =  j_aud_l  ;
+assign AUDIO_R =  j_aud_r  ;
 
 
 
@@ -441,20 +437,19 @@ assign audio_r = audio_l;
 ////////////////////////////  DDRAM  ///////////////////////////////////
 //
 //
+wire wav_load = ioctl_download && (ioctl_index == 1);
 
-
-wire       wav_load = (ioctl_index == 1);
-
-assign DDRAM_CLK = clk_sys;
+wire wav_data_ready;
+assign DDRAM_CLK = clk_48;
 ddram ddram
 (
-	.*,
-	.addr((ioctl_download & wav_load) ? ioctl_addr :   wav_addr),
-	.dout(wav_data),
-	.din(ioctl_data),
-	.we(wav_wr),
-	.rd(wav_want_byte),
-	.ready(wav_data_ready)
+        .*,
+        .addr(wav_load ? ioctl_addr : wav_addr),
+        .dout(wav_data),
+        .din(ioctl_data),
+        .we(wav_wr),
+        .rd(wav_want_byte),
+        .ready(wav_data_ready)
 );
 
 
@@ -465,33 +460,68 @@ ddram ddram
 // NOTE: the wav_wr (we) line doesn't want to stay high. It needs to be high to start, and then can't go high until wav_data_ready
 // we hold the ioctl_wait high (stop the data from HPS) until we get waV_data_ready
 
-
-
 reg wav_wr;
 always @(posedge clk_sys) begin
-	reg old_reset;
+        reg old_reset;
 
-	old_reset <= reset;
-	if(~old_reset && reset) ioctl_wait <= 0;
+        old_reset <= reset;
+        if(~old_reset && reset) ioctl_wait <= 0;
 
-	wav_wr <= 0;
-	if(ioctl_wr & wav_load) begin
-		ioctl_wait <= 1;
-		wav_wr <= 1;
-	end
-	else if(~wav_wr & ioctl_wait & wav_data_ready) begin
-		ioctl_wait <= 0;
-	end
+        wav_wr <= 0;
+        if(ioctl_wr & wav_load) begin
+                ioctl_wait <= 1;
+                wav_wr <= 1;
+        end
+        else if(~wav_wr & ioctl_wait & wav_data_ready) begin
+                ioctl_wait <= 0;
+        end
 end
 
 
+reg wav_loaded = 0;
+always @(posedge clk_sys) begin
+        reg old_load;
+
+        old_load <= wav_load;
+        if(old_load & ~wav_load) wav_loaded <= 1;
+end
+
+
+reg  [27:0] wav_addr;
+wire  [7:0] wav_data;
+wire        wav_want_byte;
+wire [15:0] pcm_audio;
+
+wire [16:0] j_pre_aud_l = ({{2{pcm_audio[15]}},pcm_audio[15:1]} + {1'b0,audio_l});
+wire [16:0] j_pre_aud_r = ({{2{pcm_audio[15]}},pcm_audio[15:1]} + {1'b0,audio_r});
+
+reg [15:0] j_aud_l,j_aud_r;
+always @(posedge clk_sys) begin
+        if(^j_pre_aud_l[16:15]) j_aud_l <= {15{j_pre_aud_l[16]}};
+        else j_aud_l <= j_pre_aud_l[15:0];
+
+        if(^j_pre_aud_r[16:15]) j_aud_r <= {15{j_pre_aud_r[16]}};
+        else j_aud_r <= j_pre_aud_r[15:0];
+end
 
 		
-reg    [27:0]wav_addr;
-wire   [7:0] wav_data;
-wire         wav_want_byte;
-wire         wav_data_ready;
+wave_sound #(24000000) wave_sound
+(
+        .I_CLK(clk_sys),
+        .I_RST(reset | ~wav_loaded),
 
+        .I_BASE_ADDR(0),
+        .I_LOOP(status[7]),
+        .I_PAUSE(~toggle_switch),
+
+        .O_ADDR(wav_addr),        // output address to wave ROM
+        .O_READ(wav_want_byte),   // read a byte
+        .I_DATA(wav_data),        // Data coming back from wave ROM
+        .I_READY(wav_data_ready), // read a byte
+
+        .O_PCM(pcm_audio)
+);
+/*
 wave_sound wave_sound
 (
         .I_CLK(clk_sys),
@@ -511,6 +541,7 @@ wave_sound wave_sound
         .O_SND(short_audio)
 );
 
+*/
 
 endmodule
 

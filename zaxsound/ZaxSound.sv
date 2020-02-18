@@ -335,7 +335,7 @@ wire [15:0] audio_l;
 wire [15:0] audio_r;
 assign AUDIO_L = audio_l;
 assign AUDIO_R = audio_r;
-assign AUDIO_S = 0; 
+assign AUDIO_S = 1; 
 
 wire [9:0] probe_0= {1'b0,rom_a[7:4],1'b0,rom_a[3:0]};
 //wire [9:0] probe_1= {2'b0,rom_d};
