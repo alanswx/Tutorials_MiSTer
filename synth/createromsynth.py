@@ -16,7 +16,7 @@ parser.add_argument("freq", type=float, help="Frequency of note")
 #0010 = saw /|/|/|
 #0100 = pulse ---
 #1000 = LFSR noise (random).
-parser.add_argument("waven", help="Waveform Enable")
+parser.add_argument("waven", type=int, help="Waveform Enable")
 parser.add_argument("pulsewidth", help="Pulse Width")
 parser.add_argument("enableringmod", help="Enable Ring Mod")
 parser.add_argument("attack", type=int, help="attack")
@@ -37,6 +37,7 @@ print('tone_freq ',tone_freq)
 soundCtl= bytearray(8)
 soundCtl[0]=(tone_freq&0x00FF00) >> 8
 soundCtl[1]=(tone_freq&0x00FF)
+soundCtl[2]=(args.waven&0x00FF)
 newFile = open(args.name, "wb")
 newFile.write(soundCtl)
 

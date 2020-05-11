@@ -64,7 +64,8 @@ always @(posedge CLK) if (ioctl_wr && (ioctl_index==2) && !ioctl_addr[24:3]) sou
       .rst(1'b0), .test(1'b0),
       .en_ringmod(1'b0), .ringmod_source(1'b0),
       .en_sync(1'b0), .sync_source(1'b0),
-      .waveform_enable(4'b0010), .pulse_width(12'd2047),
+      .waveform_enable(soundctrl[2][3:0] ), 
+      .pulse_width(12'd2047),
       .dout(voice_data_one),
       .attack(4'b0010), .decay(4'b0010), .sustain(4'b1000), .rel(4'b1100),
       .gate(!trigger_in)
