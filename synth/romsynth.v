@@ -22,15 +22,30 @@
 module synth (
     input CLK,    // 16MHz clock
     input trigger_in,  // gate
+    input [7:0] ioctl_dout,
+    input [24:0] ioctl_addr,
+    input [7:0] ioctl_index,
+    input  ioctl_wr,
     output [15:0] sound
 );
 
-
-    wire signed [11:0] voice_data_c;
-    wire signed [11:0] voice_data_e;
-    wire signed [11:0] voice_data_g;
+reg [7:0] soundctrl[8];
+always @(posedge CLK) if (ioctl_wr && (ioctl_index==2) && !ioctl_addr[24:3]) soundctrl[ioctl_addr[2:0]] <= ioctl_dout;
 
 
+   /*
+    byte  cmd 
+    0     freq hi
+    1     freq lo
+    2     waveform_en
+    3     pulse width hi
+    4     pulse width lo
+    5     enable ring mod
+    6     attack / decay
+    7     sustain / release
+ * */
+
+    wire signed [11:0] voice_data_one;
 
     wire ONE_MHZ_CLK; /* 1MHz clock for tone generator */
     clock_divider #(.DIVISOR(24)) mhzclkgen (.cin(CLK), .cout(ONE_MHZ_CLK));
@@ -42,42 +57,18 @@ module synth (
 
     // tone_freq is calculated by (16777216 * freq) / 1000000
     // so, for 261.63Hz (Middle C), tone_freq needs to be 4389.
-    voice voice_c(
-      .main_clk(ONE_MHZ_CLK), .sample_clk(SAMPLE_CLK), .tone_freq(16'd4389) /* C4, 261.63Hz */, .rst(1'b0), .test(1'b0),
+    voice voice_one(
+      .main_clk(ONE_MHZ_CLK), .sample_clk(SAMPLE_CLK), 
+      //.tone_freq(16'd4389) /* C4, 261.63Hz */, 
+      .tone_freq( { soundctrl[0], soundctrl[1] } ) /* C4, 261.63Hz */, 
+      .rst(1'b0), .test(1'b0),
       .en_ringmod(1'b0), .ringmod_source(1'b0),
       .en_sync(1'b0), .sync_source(1'b0),
       .waveform_enable(4'b0010), .pulse_width(12'd2047),
-      .dout(voice_data_c),
+      .dout(voice_data_one),
       .attack(4'b0010), .decay(4'b0010), .sustain(4'b1000), .rel(4'b1100),
       .gate(!trigger_in)
     );
-
-    voice voice_e(
-      .main_clk(ONE_MHZ_CLK), .sample_clk(SAMPLE_CLK), .tone_freq(16'd5530) /* E4, 329.63Hz */, .rst(1'b0), .test(1'b0),
-      .en_ringmod(1'b0), .ringmod_source(1'b0),
-      .en_sync(1'b0), .sync_source(1'b0),
-      .waveform_enable(4'b0010), .pulse_width(12'd2047),
-      .dout(voice_data_e),
-      .attack(4'b0010), .decay(4'b0010), .sustain(4'b1000), .rel(4'b1100),
-      .gate(!trigger_in)
-    );
-
-    voice voice_g(
-      .main_clk(ONE_MHZ_CLK), .sample_clk(SAMPLE_CLK), .tone_freq(16'd6577) /* G4, 392.00Hz */, .rst(1'b0), .test(1'b0),
-      .en_ringmod(1'b0), .ringmod_source(1'b0),
-      .en_sync(1'b0), .sync_source(1'b0),
-      .waveform_enable(4'b0010), .pulse_width(12'd2047),
-      .dout(voice_data_g),
-      .attack(4'b0010), .decay(4'b0010), .sustain(4'b1000), .rel(4'b1100),
-      .gate(!trigger_in)
-    );
-
-    wire signed [11:0] intermediate_mix;
-    wire signed [11:0] final_mix;
-
-    two_into_one_mixer intermediate_mixer(.a(voice_data_c), .b(voice_data_e), .dout(intermediate_mix));
-    two_into_one_mixer final_mixer(.a(intermediate_mix), .b(voice_data_g), .dout(final_mix));
-
-    assign sound={final_mix,4'b0};
+    assign sound={voice_data_one,4'b0};
 
 endmodule

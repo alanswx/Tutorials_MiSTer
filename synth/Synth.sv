@@ -114,6 +114,7 @@ assign HDMI_ARY = status[1] ? 8'd9  : 8'd3;
 localparam CONF_STR = {
 	"SOUND;;",
 	"F1,wav;",
+	"F2,syn;",
 	"H0O1,Aspect Ratio,Original,Wide;",
 	"H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
@@ -507,6 +508,10 @@ end
 synth synth(
  .CLK(clk_sys),
  .trigger_in(toggle_switch),
+	.ioctl_wr(ioctl_wr),
+	.ioctl_addr(ioctl_addr),
+	.ioctl_dout(ioctl_data),
+	.ioctl_index(ioctl_index),
  .sound(pcm_audio)
  );
 

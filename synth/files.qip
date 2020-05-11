@@ -5,5 +5,5 @@ set_global_assignment -name VHDL_FILE ovo.vhd
 set_global_assignment -name VHDL_FILE base_pack.vhd
 set_global_assignment -name SYSTEMVERILOG_FILE wave_sound.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ddram.sv
-set_global_assignment -name SYSTEMVERILOG_FILE "synth.v"
+set_global_assignment -name SYSTEMVERILOG_FILE "romsynth.v"
 set_global_assignment -name SYSTEMVERILOG_FILE "Synth.sv"
