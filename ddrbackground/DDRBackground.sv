@@ -608,10 +608,13 @@ always @(posedge clk_48) begin
 					
 				   if (img_addr[9:0]==10'b1111111100) begin  // if we have read in 255 bytes, we go back to idle
 						state<=2'b00;
+						img_data_to_bram_req<=0;
 					end
 					else begin
-						img_addr<=img_addr+'d4;
-						img_data_to_bram_req<=1;
+						//img_addr<=img_addr+'d4;
+						//img_data_to_bram_req<=1;
+						state<=2'b01;
+						img_data_to_bram_req<=0;
 					end
 				end
 			end
