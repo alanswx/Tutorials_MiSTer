@@ -598,7 +598,7 @@ always @(posedge clk_48) begin
 			end
 			2'b01:  // SETUP READ
 			begin
-				//img_addr<=img_addr+'d4;
+				img_addr<=img_addr+'d4;
 				img_data_to_bram_req<=1;
 				state <= 2'b10;
 			end
