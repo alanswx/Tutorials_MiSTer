@@ -3,6 +3,7 @@
 
 module soc (
    input  reset,
+	input  clk,
    input  pixel_clock,
    output [9:0] hcnt,
    output VGA_HS,
@@ -20,6 +21,7 @@ module soc (
 video_gen video_gen (
 	 .reset (reset),
 	 .hcnt(hcnt),
+	 .clk   (clk),
 	 .pclk  (pixel_clock),
 	 .hs    (VGA_HS),
 	 .vs    (VGA_VS),

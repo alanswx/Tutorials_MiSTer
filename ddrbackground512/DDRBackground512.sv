@@ -430,14 +430,6 @@ reg  [27:0]  img_addr=28'b0;
 reg  [10:0]  img_local_addr='d0;
 
 
-always @(posedge clk_sys) begin
-
-if (m_fire && offset_start>0) 
-  offset_start<='h3C00000;
-  
-	else if (m_fire)
-  offset_start<=0;
-end
 
 
 
@@ -481,6 +473,10 @@ reg  [7:0] bg_r,bg_g,bg_b,bg_a;
 reg [16:0] frame;
 reg [1:0] state = 2'b0;
 
+
+reg m_fire_r;
+
+
 reg m_right_r;
 reg m_left_r;
 always @(posedge clk_sys) begin
@@ -488,6 +484,22 @@ always @(posedge clk_sys) begin
         reg use_bg = 0;
 
         pic_req <= 0;
+		  
+		  
+
+			if (m_fire && (offset_start==0) && ~m_fire_r) 
+			begin
+			  offset_start<='h3C00000;
+			  frame<=127;
+			end
+			else if (m_fire && ~m_fire_r) begin
+			  offset_start<=0;
+			  frame<=127;
+			end
+
+  
+  
+
 		  
 		  if (m_right && ~m_right_r) begin
 				frame_start <= frame_start + 'h78000;
@@ -545,20 +557,22 @@ always @(posedge clk_sys) begin
 
                         if(~old_vs & vs) begin
                                 pic_addr <= 0;
-										  frame_start<=frame_start+ 'h78000;
-										  frame<=frame+1;
-										  img_addr<=frame_start+'h78000;
 										  
 										  
 										  if (status[7]) begin
-											if (frame=='d127) begin
-												img_addr<=0;
-												frame_start<=offset_start;
-												frame<=0;
-											end
-
+										  
+												frame_start<=frame_start+ 'h78000;
+												frame<=frame+1;
+												img_addr<=frame_start+'h78000;
+												
+												if (frame=='d127) begin
+													img_addr<=0;
+													frame_start<=offset_start;
+													img_addr<=offset_start;
+													frame<=0;
+												end
 											end else begin
-											img_addr<=0;
+												img_addr<=frame_start;
 										  end
                                 pic_req <= 1;
                         end
@@ -570,7 +584,10 @@ always @(posedge clk_sys) begin
 		  
 		  
 		  m_right_r<=m_right;
-end
+		  m_left_r<=m_left;
+		  m_fire_r<=m_fire;  
+
+ end
 
 /*
 

@@ -385,6 +385,7 @@ ovo #(.COLS(9), .LINES(2), .RGB(24'hFF00FF)) diff (
 wire [9:0] hcnt;
 
 soc soc(
+   .clk(clk_48),
    .pixel_clock(ce_pix), // wrong
    .reset(reset), // wrong
    .VGA_HS(hs),

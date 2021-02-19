@@ -2,6 +2,7 @@
 
 module video_gen(
    // pixel clock
+	input  clk,
    input  pclk,
    input  reset,
 		
