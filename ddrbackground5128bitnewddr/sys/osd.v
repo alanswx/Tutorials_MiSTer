@@ -83,8 +83,8 @@ always@(posedge clk_sys) begin
 			end else begin
 				// command 0x40: OSDCMDENABLE, OSDCMDDISABLE
 				if(cmd[7:4] == 4) begin
-					if(bcnt == 0) infox <= io_din[11:0] ;
-					if(bcnt == 1) infoy <= io_din[11:0] ;
+					if(bcnt == 0) infox <= io_din[11:0];
+					if(bcnt == 1) infoy <= io_din[11:0];
 					if(bcnt == 2) infow <= {io_din[5:0], 3'b000};
 					if(bcnt == 3) infoh <= {io_din[5:0], 3'b000};
 					if(bcnt == 4) rot   <= io_din[1:0];
@@ -196,7 +196,7 @@ always @(posedge clk_video) begin
 		if(de_in && !deD) begin
 			h_cnt <= 0;
 			v_cnt <= v_cnt + 1'd1;
-			h_osd_start <= info ? (rot[0] ? infoy : infox) : (((dsp_width - osd_w)) - 2'd2); // ajs
+			h_osd_start <= info ? (rot[0] ? infoy : infox) : (((dsp_width - osd_w)>>1) - 2'd2);
 
 			if(h_cnt > {dsp_width, 2'b00}) begin
 				v_cnt <= 1;

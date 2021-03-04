@@ -122,22 +122,15 @@ assign VIDEO_ARY = (!ar) ?  8'd3  : 12'd0;
 
 `include "build_id.v" 
 
+
+
 localparam CONF_STR = {
-	"MENU;FRONTEND;",
-	"F1,img;",
-	"V,v",`BUILD_DATE 
-};
-reg img_loaded = 1;
-
-//reg img_loaded = 0;
-
-localparam CONF_STR_OLD = {
 	"IMAGE512;;",
 	"F1,img;",
 	"H0OEF,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
 	"-;",
-	"O7,Loop,Yes,No;",
+	"O7,Loop,No,Yes;",
 	"-;",
 	"R0,Reset;",
 	"J1,Fire,Start 1P,Start 2P,Coin,Cheat;",
@@ -175,7 +168,7 @@ wire  [7:0] ioctl_index;
 wire        ioctl_wr;
 wire        ioctl_wait;
 wire [26:0] ioctl_addr;
-wire  [15:0] ioctl_dout;
+wire  [7:0] ioctl_dout;
 
 wire [10:0] ps2_key;
 
@@ -186,7 +179,7 @@ wire [15:0] joy2a;
 
 wire [21:0] gamma_bus;
 
-hps_io #(.STRLEN($size(CONF_STR)>>3), .WIDE(1)) hps_io
+hps_io #(.STRLEN($size(CONF_STR)>>3), .WIDE(0)) hps_io
 (
 	.clk_sys(clk_sys),
 	.HPS_BUS(HPS_BUS),
@@ -334,8 +327,22 @@ assign AUDIO_L =  0  ;
 assign AUDIO_R =  0  ;
 
 
+////////////////////////////  IMAGE INFO  ///////////////////////////////
+//
+//    [ pointer ]                                [64 bits]
+//    [width] [height] [ # of frames ]           [16 bits][16 bits][32 bits]
+//    [ palette ]                                [32 bits * 256 -> 1024 bytes]
+//    [img - frame 0]                            [512 bytes * 240 bytes -> 122880 ]
+//    [img - frame 1]
+//    etc
 
 
+//
+//  At VBlank -- load the pointer
+//  Load the header
+//  jump to image and load palette
+//  after vblank - start loading image data as is..
+//
 
 ////////////////////////////  MEMORY  ///////////////////////////////////
 //
@@ -350,50 +357,30 @@ wire img_data_ready;
 assign DDRAM_CLK = clk_sys;
 
 
-wire img_save_data_ready;
-wire [31:0] img_data_to_bram;
+wire [63:0] img_data_to_bram;
 reg img_data_to_bram_req=1;
 wire img_load_data_ready;
+
+// we can change this to do burst, and get a line at a time
+// if we do that, we need to change the state machine because
+// it will ask for the start address of the line, then it will give us "ready" 8 times - the 
+// ddram module would need another state to handle this
 
 ddram ddram
 (
 	.*,
 
-	// use two 8 bit values to do a write.. 
-	.ch1_addr({1'b0,ioctl_addr[26:1]}),
-	.ch1_din(ioctl_dout), // 16 bits
-	.ch1_dout(), // 64 bits
-	.ch1_req(img_wr  ),
-	.ch1_rnw(~img_wr ),
-	.ch1_ready(img_save_data_ready),
-
-	.ch2_addr(img_addr[27:1]),
-	.ch2_din(32'b0), // 32 bits
-	.ch2_dout(img_data_to_bram), // 32 bits
-	.ch2_req(img_data_to_bram_req),
-	.ch2_rnw(1'b1), // read only
-	.ch2_ready(img_load_data_ready),
-
-	.ch3_addr(25'b0),
-	.ch3_din(16'b0),  // 16 bits
-	.ch3_dout(),  // 16 bits
-	.ch3_req(1'b0),
-	.ch3_rnw(1'b1),
-	.ch3_ready(),
-
-	.ch4_addr(27'b0),
-	.ch4_din(64'b0),  // 64 bits
-	.ch4_dout(),  // 64 bits
-	.ch4_req(1'b0),
-	.ch4_rnw(1'b1),
-	.ch4_ready(),
-   
-   .ch5_addr(27'b0),
-   .ch5_din(64'b0),  // always writes -- 64bits
-   .ch5_req(1'b0),
-   .ch5_ready()
-   
+	.ch1_addr(img_addr[27:1]),
+	.ch1_dout(img_data_to_bram),
+	.ch1_din(64'b0),
+	.ch1_rnw(1'b1),
+	.ch1_req(img_data_to_bram_req),
+	.ch1_ready(img_load_data_ready)
+	
 );
+
+wire img_save_data_ready = img_load ? img_load_data_ready :0;
+
 
 
 
@@ -421,6 +408,7 @@ always @(posedge clk_sys) begin
 end
 
 
+reg img_loaded = 0;
 always @(posedge clk_sys) begin
         reg old_load;
 
@@ -435,23 +423,64 @@ wire [9:0] vpos;
 
 reg  [27:0]  frame_start=28'b0;
 reg  [27:0]  offset_start=0;
-reg  [27:0]  img_addr=28'b0;
+reg  [27:0]  img_addr={18'b0,10'b0111111000};
 reg  [10:0]  img_local_addr='d0;
 
 
+ pal_ram pal_ram(
+	.wrclock(clk_sys),
+	.data(img_data_to_bram), // 64 bit
+	.wraddress(pal_addr[9:3]), // 6:0
+	.wren(img_load_data_ready),
 
 
+	.rdclock(clk_sys), // 
+	.rdaddress(pic_data), 
+	.q(rgb_data) // 32 bit
+
+);
+
+
+
+ram64_8 lineram 
+(
+	.wrclock(clk_sys),
+	.data(img_data_to_bram), // 64 bit
+	.wraddress(img_addr[9:3]), // 6:0
+	.wren(img_load_data_ready),
+	.rdclock(clk_sys), // 
+	.rdaddress(pic_addr[9:0]), // 9:0
+	.q(pic_data) // 8 bit
+);
+/*
+module ram64_8 (
+	data,
+	rdaddress,
+	rdclock,
+	wraddress,
+	wrclock,
+	wren,
+	q);
+
+	input	[63:0]  data;
+	input	[8:0]  rdaddress;
+	input	  rdclock;
+	input	[5:0]  wraddress;
+	input	  wrclock;
+	input	  wren;
+	output	[7:0]  q;
+	*/
 
 reg start_img_load = 1'b1;
 
 
 // width is 256, make it 2 lines big
-wire [31:0] pic_data;
-
-dpram #(.addr_width_g(10),.data_width_g(32))
+wire [7:0] pic_data;
+/*
+dpram #(.addr_width_g(10),.data_width_g(8))
 address_table(
 	.clock_a(clk_sys),
-	.address_a(img_addr[11:2]),
+	.address_a(img_addr[9:0]),
 	.data_a(img_data_to_bram), 
 	.wren_a(img_load_data_ready),
 	
@@ -460,7 +489,7 @@ address_table(
 	.address_b(pic_addr[9:0]),
 	.q_b(pic_data)
 );
-
+*/
 //
 //  we need to load a line of bram with the output of DDR
 //
@@ -470,17 +499,18 @@ address_table(
 
 
 
-
-assign r = bg_r;
-assign g = bg_g;
-assign b = bg_b;
+// 3 3 2
+assign r = {bg_r,bg_r,bg_r[1:0]};
+assign g = {bg_g,bg_g,bg_g[1:0]};
+assign b = {bg_b,bg_b,bg_b,bg_b};
 
 reg        pic_req;
 reg [24:0] pic_addr;
-reg  [7:0] bg_r,bg_g,bg_b,bg_a;
+reg  [2:0] bg_r,bg_g;
+reg  [1:0] bg_b;
 
 reg [16:0] frame;
-reg [1:0] state = 2'b0;
+reg [1:0] state = 2'b01;
 
 
 reg m_fire_r;
@@ -498,7 +528,7 @@ always @(posedge clk_sys) begin
 
 			if (m_fire && (offset_start==0) && ~m_fire_r) 
 			begin
-			  offset_start<='h3C00000;
+			  offset_start<='hF00000;
 			  frame<=127;
 			end
 			else if (m_fire && ~m_fire_r) begin
@@ -511,10 +541,10 @@ always @(posedge clk_sys) begin
 
 		  
 		  if (m_right && ~m_right_r) begin
-				frame_start <= frame_start + 'h78000;
+				frame_start <= frame_start + 'h1E000;
 		  end
 		  if (m_left && ~m_left_r) begin
-				frame_start <= frame_start - 'h78000;
+				frame_start <= frame_start - 'h1E000;
 		  end
 		  
 		  
@@ -530,7 +560,7 @@ always @(posedge clk_sys) begin
 			end
 			2'b01:  // SETUP READ
 			begin
-				img_addr<=img_addr+'d4;
+				img_addr<=img_addr+'d8;
 				img_data_to_bram_req<=1;
 				state <= 2'b10;
 			end
@@ -538,13 +568,12 @@ always @(posedge clk_sys) begin
 			begin
 				if (img_load_data_ready) begin  // if data isn't ready, sit and spin in this state
 					
-				   if (img_addr[10:0]==11'b11111111100) begin  // if we have read in 255 bytes, we go back to idle
+				   if (img_addr[8:0]==9'b111111000) begin  // if we have read in 511 bytes, we go back to idle
+					                       
 						state<=2'b00;
 						img_data_to_bram_req<=0;
 					end
 					else begin
-						//img_addr<=img_addr+'d4;
-						//img_data_to_bram_req<=1;
 						state<=2'b01;
 						img_data_to_bram_req<=0;
 					end
@@ -558,7 +587,7 @@ always @(posedge clk_sys) begin
         if(img_loaded) begin
                 if(ce_pix) begin
                         old_vs <= vs;
-                        {bg_a,bg_r,bg_g,bg_b} <= pic_data;
+                        {bg_r,bg_g,bg_b} <= pic_data;
                         if(~(hblank|vblank)) begin
                                 pic_addr <= pic_addr + 2'd1;
                                 pic_req <= 1;
@@ -568,11 +597,11 @@ always @(posedge clk_sys) begin
                                 pic_addr <= 0;
 										  
 										  
-										  if (~status[7]) begin
+										  if (status[7]) begin
 										  
-												frame_start<=frame_start+ 'h78000;
+												frame_start<=frame_start+ 'h1E000;
 												frame<=frame+1;
-												img_addr<=frame_start+'h78000;
+												img_addr<=frame_start+'h1E000;
 												
 												if (frame=='d127) begin
 													img_addr<=0;
@@ -588,7 +617,7 @@ always @(posedge clk_sys) begin
                 end
         end
         else begin
-                {bg_a,bg_b,bg_g,bg_r} <= 0;
+                {bg_b,bg_g,bg_r} <= 0;
         end
 		  
 		  
@@ -597,128 +626,6 @@ always @(posedge clk_sys) begin
 		  m_fire_r<=m_fire;  
 
  end
-
-/*
-
-// width is 256, make it 2 lines big
-wire [31:0] pic_data;
-
-dpram #(.addr_width_g(11),.data_width_g(32))
-address_table(
-	.clock_a(clk_sys),
-	.address_a({dbank,img_local_addr[9:0]}),
-	.data_a(img_data_to_bram), 
-	.wren_a(img_load_data_ready),
-	
-	// read from our line buffer and output to screen
-	.clock_b(clk_sys),
-	.address_b({bank,pic_addr[9:0]}),
-	.q_b(pic_data)
-);
-
-
-
-//
-//  we need to load a line of bram with the output of DDR
-//
-
-// 32 bits
-
-
-
-
-
-assign r = bg_r;
-assign g = bg_g;
-assign b = bg_b;
-
-reg [24:0] pic_addr;
-reg  [7:0] bg_r,bg_g,bg_b,bg_a;
-
-reg bank=0;
-reg dbank=0;
-
-reg [1:0] state = 2'b0;
-
-reg ce_pix_r;
-
-always @(posedge clk_sys) begin
-        reg old_vs;
-
-
-		  
-		  
-		  
-		  
-		  case (state)
-			2'b00:  // IDLE
-			begin
-				img_data_to_bram_req<=0;
-				// start loading ram at the end of a line
-				if (pic_addr=='d511) begin
-					state<=2'b01;
-					dbank<=~dbank;
-				end
-			end
-			2'b01:  // SETUP READ
-			begin
-				img_addr<=img_addr+'d4;
-				img_local_addr<=img_local_addr+'d1;
-				img_data_to_bram_req<=1;
-				state <= 2'b10;
-			end
-			2'b10:  // WAIT
-			begin
-				if (img_load_data_ready) begin  // if data isn't ready, sit and spin in this state
-					
-				   if (img_local_addr=='d511) begin  // if we have read in 255 bytes, we go back to idle
-						state<=2'b00;
-						img_local_addr<=0;
-						img_addr<= {7'b0,vpos,11'b0};
-						img_data_to_bram_req<=0;
-					end
-					else begin
-						state<=2'b01;
-						img_data_to_bram_req<=0;
-					end
-				end
-			end
-			default:
-			begin
-			end
-		  endcase
-		  
-        if(img_loaded) begin
-                if(ce_pix && ~ce_pix_r) begin
-                        old_vs <= vs;
-                        {bg_a,bg_r,bg_g,bg_b} <= pic_data;
-                        if(~(hblank|vblank)) begin
-								        if (pic_addr == 'd511)
-										  begin
-											pic_addr<= 0;
-											bank<=~bank;
-										  end
-										  else begin
-											pic_addr <= pic_addr + 'd1;
-										  end
-                        end
-
-                        if(~old_vs & vs) begin
-                                pic_addr <= 0;
-										  bank<=0;
-										  img_addr<=0;
-                        end
-                end
-        end
-        else begin
-                {bg_a,bg_b,bg_g,bg_r} <= 0;
-        end
-
-		  
-	ce_pix_r<=ce_pix;
-		  
-end
-*/
 
 
 endmodule
