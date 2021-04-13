@@ -12,8 +12,6 @@ module soc (
 	output VGA_DE
 );
 
-// de-activate unused SDRAM
-assign SDRAM_nCS = 1;
 
 
 vga vga (
