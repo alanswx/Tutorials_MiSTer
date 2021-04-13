@@ -336,7 +336,9 @@ assign AUDIO_R =  0  ;
 //    [img - frame 1]
 //    etc
 
-
+reg [15:0] header_width;
+reg [15:0] header_height;
+reg [31:0] header_frames;
 //
 //  At VBlank -- load the pointer
 //  Load the header
@@ -374,7 +376,7 @@ ddram ddram
 	.ch1_dout(img_data_to_bram),
 	.ch1_din(64'b0),
 	.ch1_rnw(1'b1),
-	.ch1_req(img_data_to_bram_req),
+	.ch1_req(img_data_to_bram_req||pal_data_to_bram_req),
 	.ch1_ready(img_load_data_ready)
 	
 );
@@ -424,6 +426,7 @@ wire [9:0] vpos;
 reg  [27:0]  frame_start=28'b0;
 reg  [27:0]  offset_start=0;
 reg  [27:0]  img_addr={18'b0,10'b0111111000};
+reg  [27:0]  pal_addr={18'b0,10'b0111111000};
 reg  [10:0]  img_local_addr='d0;
 
 
@@ -431,7 +434,7 @@ reg  [10:0]  img_local_addr='d0;
 	.wrclock(clk_sys),
 	.data(img_data_to_bram), // 64 bit
 	.wraddress(pal_addr[9:3]), // 6:0
-	.wren(img_load_data_ready),
+	.wren(img_load_data_ready & pal_data_to_bram_req),
 
 
 	.rdclock(clk_sys), // 
@@ -510,7 +513,7 @@ reg  [2:0] bg_r,bg_g;
 reg  [1:0] bg_b;
 
 reg [16:0] frame;
-reg [1:0] state = 2'b01;
+reg [2:0] state = 3'b000;
 
 
 reg m_fire_r;
@@ -549,7 +552,33 @@ always @(posedge clk_sys) begin
 		  
 		  
 		  case (state)
-			2'b00:  // IDLE
+		   3'b000:  // start load of pointer
+			begin
+			   img_addr=0;
+				state=3'b100;
+			end
+			3'b001:  // SETUP READ
+			begin
+				img_addr<=img_addr+'d8;
+				img_data_to_bram_req<=1;
+				state <= 2'b10;
+			end
+			3'b010:  // WAIT
+			begin
+				if (img_load_data_ready) begin  // if data isn't ready, sit and spin in this state
+					
+				   if (img_addr[8:0]==9'b111111000) begin  // if we have read in 511 bytes, we go back to idle
+					                       
+						state<=3'b011;
+						img_data_to_bram_req<=0;
+					end
+					else begin
+						state<=2'b001;
+						img_data_to_bram_req<=0;
+					end
+				end
+			end
+			3'b011:  // IDLE
 			begin
 				img_data_to_bram_req<=0;
 				// start loading ram at the end of a line
@@ -558,27 +587,39 @@ always @(posedge clk_sys) begin
             else if (pic_addr[9:0]=='d1023) 
 					state<=2'b01;
 			end
-			2'b01:  // SETUP READ
+			3'b100: // read pointer
 			begin
-				img_addr<=img_addr+'d8;
-				img_data_to_bram_req<=1;
-				state <= 2'b10;
-			end
-			2'b10:  // WAIT
-			begin
-				if (img_load_data_ready) begin  // if data isn't ready, sit and spin in this state
-					
-				   if (img_addr[8:0]==9'b111111000) begin  // if we have read in 511 bytes, we go back to idle
-					                       
-						state<=2'b00;
-						img_data_to_bram_req<=0;
-					end
-					else begin
-						state<=2'b01;
-						img_data_to_bram_req<=0;
-					end
+				if (img_load_data_ready) begin
+					img_addr<=img_data_to_bram;
+					state=3'b101;
 				end
 			end
+			3'b101: // read header
+			begin
+				if (img_load_data_ready) begin
+					header_width<=img_data_to_bram[63:48];
+					header_height<=img_data_to_bram[47:32];
+					header_frames<=img_data_to_bram[31:0];
+					state=3'b110;
+					img_addr<=img_addr+'d8;
+					pal_addr<='d0;
+					pal_data_to_bram_req<=1;
+				end
+
+			end
+			3'b110: // read palette
+			begin
+					if (img_load_data_ready) begin
+						img_addr<=img_addr+'d8;
+						pal_addr<=pal_addr+'d8;
+						if (pal_addr=='d255) begin
+							pal_data_to_bram_req<=0;
+							state=3'b001;
+						end
+					end
+
+			end
+			
 			default:
 			begin
 			end

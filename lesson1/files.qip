@@ -1,0 +1,4 @@
+set_global_assignment -name SYSTEMVERILOG_FILE Lesson1.sv
+set_global_assignment -name QIP_FILE sys/sys.qip
+set_global_assignment -name VERILOG_FILE rtl/vga.v
+set_global_assignment -name SDC_FILE Lesson1.sdc
