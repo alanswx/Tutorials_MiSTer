@@ -3,6 +3,10 @@
 These are tutorials translated from the [mist](https://github.com/mist-devel/mist-board/tree/master/tutorials/soc) project to work with MiSTer.  
 
 
+[Lesson 0](lesson0): Setup development environment
+--------------------------
+Follow the steps here to setup quartus 17.0.2 and get started on MiSTer.
+
 What is this?
 -------------
 
