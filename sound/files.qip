@@ -1,9 +1,0 @@
-
-set_global_assignment -name SYSTEMVERILOG_FILE soc.v
-set_global_assignment -name SYSTEMVERILOG_FILE video.v
-set_global_assignment -name SYSTEMVERILOG_FILE sound_rom.v
-set_global_assignment -name VHDL_FILE ovo.vhd
-set_global_assignment -name VHDL_FILE base_pack.vhd
-set_global_assignment -name VHDL_FILE dpram.vhd
-
-set_global_assignment -name SYSTEMVERILOG_FILE "Sound.sv"
