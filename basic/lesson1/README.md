@@ -11,6 +11,20 @@ vga.v is in the rtl folder, and it contains the timing information to make the p
 
 Load this project into quartus and build it. The RBF will be in the output_files folder, copy it to your MiSTer and see if you can run it.
 
+![](lesson1_grey.png)
+
+# White checkerboard
+
+If we change the r,g,b to be 8 pixels instead of 332 by concatenating the colors, then we can get a better color reproduction
+
+```verilog
+assign r = { pixel[7:5],  pixel[7:5] , pixel[7:6]};
+assign g = { pixel[4:2],  pixel[4:2] , pixel[4:3]};
+assign b = { pixel[1:0], pixel[1:0] , pixel[1:0],pixel[1:0] };
+```
+
+![](lesson1_white.png)
+
 # Modification
 
 Let's modify the code so that we can use a joystick to control the color of the squares.
@@ -85,3 +99,6 @@ module vga (
 ```verilog
 		pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:color;    // checkboard
 ```
+
+
+![](lesson1_red.png)
