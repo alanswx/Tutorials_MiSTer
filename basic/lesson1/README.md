@@ -7,6 +7,11 @@ The top level is in Lesson1.sv and this pulls in the MiSTer framework. It hooks 
 
 vga.v is in the rtl folder, and it contains the timing information to make the pulses that VGA relies on.  This also has the logic to create the checker board pattern of black and white.
 
+
+
+[![Lesson 1 Video](http://img.youtube.com/vi/81GN5DLCFOk/0.jpg)](http://www.youtube.com/watch?v=81GN5DLCFOk "Lesson 1 Video")
+
+
 # Step one build existing code
 
 Load this project into quartus and build it. The RBF will be in the output_files folder, copy it to your MiSTer and see if you can run it.
