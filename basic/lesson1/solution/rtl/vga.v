@@ -10,6 +10,7 @@
 module vga (
    // pixel clock
    input  pclk,
+	input  [7:0] color,
    // VGA output
    output reg	hs,
    output reg 	vs,
@@ -84,7 +85,7 @@ always@(posedge pclk) begin
 		if(h_cnt[1:0] == 2'b11)
 			video_counter <= video_counter + 14'd1;
 		
-		pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:8'hff;    // checkboard
+		pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:color;    // checkboard
 		de<=1;
 	end else begin
 		if(h_cnt == H+HFP) begin
