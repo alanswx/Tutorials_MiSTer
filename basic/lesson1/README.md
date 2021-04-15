@@ -33,6 +33,20 @@ We add two lines to the config, J1 tells it to label the first button "Red" and 
 	"jn,A;",
 ```
 
+Add the first joystick to the hps_io:
+
+```verilog
+hps_io #(.STRLEN(($size(CONF_STR)>>3)) , .PS2DIV(1000), .WIDE(1)) hps_io
+(
+	.clk_sys(clk_sys),
+	.HPS_BUS(HPS_BUS),
+	.status(status),
+	.joystick_0(joy),
+	.conf_str(CONF_STR)
+	
+);
+```
+
 We need to check button 4, and if it is pressed, we can change the color to red, since we are in 332 RGB, then the first three bits should be 111 and the rest 0. If we want we can use this syntax with the underscores to make it more clear to read. The underscores are ignored.
 ```verilog
 wire [7:0] color = joy[4] ? 8'b111_000_00 : 8'hFF;
