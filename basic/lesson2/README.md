@@ -110,6 +110,29 @@ always@(posedge pclk) begin
 end
 ```
 
+At the top of vga.v change the inputs so we can send the ioctl_data to the DPRAM:
+```verilog
+module vga (
+   // pixel clock
+   input  pclk,
+	
+	// CPU interface (write only!)
+   input  ioctl_wr,
+   input [13:0] ioctl_addr,
+   input [7:0] ioctl_data,
+
+		
+   // VGA output
+   output reg	hs,
+   output reg 	vs,
+   output [7:0] r,
+   output [7:0] g,
+   output [7:0] b,
+	output VGA_DE
+);
+```
+
+
 
 The soc.v file needs to be simplified:  We probably don't need it at all since it isn't doing anything but passing the signals to the vga module. 
 
@@ -135,7 +158,6 @@ module soc (
 vga vga (
 	 .pclk  (pixel_clock),
 	 
-	 .cpu_clk  ( pixel_clock      ),
 	 .ioctl_wr   ( ioctl_wr ),
 	 .ioctl_addr ( ioctl_addr    ),
 	 .ioctl_data ( ioctl_data             ),
@@ -174,7 +196,7 @@ We will add the ioctl signals that we need to the hps_io and define wires to rou
 //
 wire [31:0] status;
 wire        ioctl_download;
-wire  [7:0] ioctl_index;
+wire  [7:0] ioctl_dout;
 wire        ioctl_wr;
 wire [26:0] ioctl_addr;
 
