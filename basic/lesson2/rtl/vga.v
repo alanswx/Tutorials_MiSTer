@@ -46,8 +46,8 @@ reg vblank;
 
 // horizontal pixel counter
 always@(posedge pclk) begin
-	if(h_cnt==H+HFP+HS+HBP-1)   h_cnt <= 0;
-	else                        h_cnt <= h_cnt + 1;
+	if(h_cnt==H+HFP+HS+HBP-1)   h_cnt <= 10'b0;
+	else                        h_cnt <= h_cnt + 10'b1;
 
 	// generate negative hsync signal
 	if(h_cnt == H+HFP)    hs <= 1'b0;
@@ -60,8 +60,8 @@ always@(posedge pclk) begin
 always@(posedge pclk) begin
 	// the vertical counter is processed at the begin of each hsync
 	if(h_cnt == H+HFP) begin
-		if(v_cnt==VS+VBP+V+VFP-1)  v_cnt <= 0; 
-		else							        v_cnt <= v_cnt + 1;
+		if(v_cnt==VS+VBP+V+VFP-1)  v_cnt <= 10'b0; 
+		else							   v_cnt <= v_cnt + 10'b1;
 
 	        // generate positive vsync signal
 		if(v_cnt == V+VFP)    vs <= 1'b1;
@@ -115,9 +115,9 @@ always@(posedge pclk) begin
 end
 
 // seperate 8 bits into three colors (332)
-assign r = { pixel[7:5],  3'b00000 };
-assign g = { pixel[4:2],  3'b00000 };
-assign b = { pixel[1:0], 4'b000000 };
+assign r = { pixel[7:5],  pixel[7:5] , pixel[7:6]};
+assign g = { pixel[4:2],  pixel[4:2] , pixel[4:3]};
+assign b = { pixel[1:0], pixel[1:0] , pixel[1:0],pixel[1:0] };
 
 // split the 8 rgb bits into the three base colors. Every second line is
 // darker to give some scanlines effect
