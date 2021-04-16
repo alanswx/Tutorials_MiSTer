@@ -73,12 +73,12 @@ remove this: it used to copy the data from the ROM into RAM.
 //always @(posedge cpu_clk)
 //	if(cpu_wr) 
 //		vmem[cpu_addr] <= cpu_data;
-
+```
 
 
 Originally the next block would count through the pixels and generate an address, and set the pixel. Instead that chunk of code should just generate the address, and the DPRAM block will place the image data onto the pixel wire itself. We should change the pixel type, and remove it from the second block.
 
-```
+
 
 ```verilog
 wire [7:0] pixel;
