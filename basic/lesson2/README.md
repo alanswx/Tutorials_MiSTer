@@ -10,7 +10,7 @@ vga.v is in the rtl folder, and it contains the timing information to make the p
 
 
 
-[![Lesson 2 Video](http://img.youtube.com/vi/81GN5DLCFOk/0.jpg)](http://www.youtube.com/watch?v=81GN5DLCFOk "Lesson 2 Video")
+[![Lesson 2 Video](http://img.youtube.com/vi/97o_aMsqumY/0.jpg)](http://www.youtube.com/watch?v=97o_aMsqumY "Lesson 2 Video")
 
 
 # Step one build existing code
