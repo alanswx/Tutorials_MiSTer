@@ -113,20 +113,10 @@ always@(posedge pclk) begin
 end
 
 // seperate 8 bits into three colors (332)
-assign r = { pixel[7:5],  3'b00000 };
-assign g = { pixel[4:2],  3'b00000 };
-assign b = { pixel[1:0], 4'b000000 };
+assign r = { pixel[7:5],  pixel[7:5] , pixel[7:6]};
+assign g = { pixel[4:2],  pixel[4:2] , pixel[4:3]};
+assign b = { pixel[1:0], pixel[1:0] , pixel[1:0],pixel[1:0] };
 
-// split the 8 rgb bits into the three base colors. Every second line is
-// darker to give some scanlines effect
-//assign r = (!v_cnt[0])?{ pixel[7:5],  3'b00000 }:{ 1'b0, pixel[7:5],  2'b0000 };
-//assign g = (!v_cnt[0])?{ pixel[4:2],  3'b00000 }:{ 1'b0, pixel[4:2],  2'b0000 };
-//assign b = (!v_cnt[0])?{ pixel[1:0], 4'b000000 }:{ 1'b0, pixel[1:0], 3'b00000 };
-
-
-//assign r = 8'h00;
-//assign g = 8'hff;
-//assign b = 8'h00;
 
 assign VGA_DE = de;
 

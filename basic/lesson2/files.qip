@@ -1,5 +1,5 @@
 set_global_assignment -name SYSTEMVERILOG_FILE Lesson2.sv
 set_global_assignment -name QIP_FILE sys/sys.qip
-set_global_assignment -name QIP_FILE rtl/image.qip
 set_global_assignment -name VERILOG_FILE rtl/vga.v
 set_global_assignment -name VERILOG_FILE rtl/soc.v
+set_global_assignment -name VHDL_FILE rtl/dpram.vhd
