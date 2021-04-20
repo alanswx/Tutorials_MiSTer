@@ -194,8 +194,7 @@ assign LED_USER  = copy_in_progress;
 
 `include "build_id.v"
 localparam CONF_STR = {
-	"Lesson2;;",
-	"F1,BIN;",
+	"Lesson3;;",
 	"-;",
 	"O89,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
