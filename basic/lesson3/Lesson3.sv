@@ -209,10 +209,6 @@ localparam CONF_STR = {
 // HPS is the module that communicates between the linux and fpga
 //
 wire [31:0] status;
-wire        ioctl_download;
-wire  [7:0] ioctl_dout;
-wire        ioctl_wr;
-wire [26:0] ioctl_addr;
 
 hps_io #(.STRLEN(($size(CONF_STR)>>3)) , .PS2DIV(1000), .WIDE(0)) hps_io
 (
@@ -220,10 +216,6 @@ hps_io #(.STRLEN(($size(CONF_STR)>>3)) , .PS2DIV(1000), .WIDE(0)) hps_io
 	.HPS_BUS(HPS_BUS),
 	.status(status),
 
-	.ioctl_download(ioctl_download),
-	.ioctl_wr(ioctl_wr),
-	.ioctl_addr(ioctl_addr),
-	.ioctl_dout(ioctl_dout),
 	
 	.conf_str(CONF_STR)
 	
