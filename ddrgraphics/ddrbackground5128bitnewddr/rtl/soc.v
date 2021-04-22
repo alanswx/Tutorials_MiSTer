@@ -1,0 +1,38 @@
+// A simple system-on-a-chip (SoC) for the MiST
+// (c) 2015 Till Harbaum
+
+module soc (
+   input  reset,
+	input  clk,
+   input  pixel_clock,
+   output [9:0] hcnt,
+   output VGA_HS,
+   output VGA_VS,
+   output [7:0] VGA_R,
+   output [7:0] VGA_G,
+   output [7:0] VGA_B,
+   output VGA_DE,
+   output VGA_HBLANK,
+   output VGA_VBLANK
+);
+
+
+
+video_gen video_gen (
+	 .reset (reset),
+	 .hcnt(hcnt),
+	 .clk   (clk),
+	 .pclk  (pixel_clock),
+	 .hs    (VGA_HS),
+	 .vs    (VGA_VS),
+	 .r     (VGA_R),
+	 .g     (VGA_G),
+	 .b     (VGA_B),
+	 .VGA_HBLANK(VGA_HBLANK),
+	 .VGA_VBLANK(VGA_VBLANK),
+	 .VGA_DE(VGA_DE)
+);
+					
+
+
+endmodule
