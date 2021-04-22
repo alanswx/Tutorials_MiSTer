@@ -37,16 +37,27 @@ else if (hasMatchE0 && cart_size=='d8192) force_bs<=BANKE0;
 else if (hasMatch3F && cart_size>'d4096) force_bs<=BANK3F;
 else if (hasMatchCV) force_bs<=BANKCV;
 else if (hasMatchE7) force_bs<=BANKE7;
+else if (cart_size == 'h2000 && hasMatchUA ) force_bs<=BANKUA; //  8k and less
+else if (cart_size == 'h1800) force_bs<=BANKAR; //  multiple of 8448 is cassette  AR 
+else if (cart_size == 'h2100) force_bs<=BANKAR; //  multiple of 8448 is cassette  AR 
+else if (cart_size == 'h4200) force_bs<=BANKAR; //  multiple of 8448 is cassette  AR 
+else if (cart_size == 'h6300) force_bs<=BANKAR; //  multiple of 8448 is cassette  AR 
+else if (cart_size == 'h8400) force_bs<=BANKAR; //  multiple of 8448 is cassette  AR 
 else if (cart_size <= 'h0800) force_bs<=BANK2K; //  2k and less
 else if (cart_size <= 'h1000) force_bs<=BANK00; //  4k and less
 else if (cart_size <= 'h2000) force_bs<=BANKF8; //  8k and less
 else if (cart_size >= 'h2800 && cart_size <= 'h2900) force_bs<=BANKP2; // 10k+256 and less, should be > 10k < 10k+256?
 else if (cart_size <= 'h3000) force_bs<=BANKFA; // 12k and less
 else if (cart_size <= 'h4000) force_bs<=BANKF6; // 16k and less
-else if (cart_size <= 'h4000) force_bs<=BANKF4; // 32k and less
-else if (cart_size <= 'h4000) force_bs<=BANK32; // 64k and less
+else if (cart_size <= 'h8000) force_bs<=BANKF4; // 32k and less
+else if (cart_size < 'h10000) force_bs<=BANK32; // 64k and less
+else if (cart_size == 'h10000) force_bs<=BANKF0; // 64k  - there are a few checks here
 else force_bs<=0;
 
+
+//wire hasMatchFE = (~hasMatchF8) && (hasMatchFE_0 | hasMatchFE_1 | hasMatchFE_2 | hasMatchFE_3 );
+//$display(" hasMatchF8 %x hasMatchFE_0 %x hasMatchFE_1 %x hasMatcHFE_2 %x hasMatchFE_3 %x",hasMatchF8,hasMatchFE_0,hasMatchFE_1,hasMatchFE_2,hasMatchFE_3);
+//$display(" hasMatchFE %x ",hasMatchFE);
 end
 
 //----------------------------
@@ -434,7 +445,6 @@ bool CartDetector::isProbablyFE(const ByteBuffer& image, size_t size)
 //------------------------------
 // CV detector
 //-------------------------------
-// we need to check is FE and not F8
 
 wire hasMatchCV_0 , hasMatchCV_1;
 wire hasMatchCV = hasMatchCV_0 | hasMatchCV_1;
@@ -480,7 +490,129 @@ bool CartDetector::isProbablyCV(const ByteBuffer& image, size_t size)
 }
 */
 
+//------------------------------
+// UA detector
+//-------------------------------
 
+wire hasMatchUA_0 , hasMatchUA_1 , hasMatchUA_2 , hasMatchUA_3 , hasMatchUA_4 , hasMatchUA_5 , hasMatchUA_6;
+wire hasMatchUA = hasMatchUA_0 | hasMatchUA_1 | hasMatchUA_2 | hasMatchUA_3 | hasMatchUA_4 | hasMatchUA_5 | hasMatchUA_6;
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'h8D, 8'h40 , 8'h02 }),
+	.needmatches(8'd1)
+	) match_bytes_UA_0(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_0)
+);
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'hAD, 8'h40 , 8'h02 }),
+	.needmatches(8'd1)
+	) match_bytes_UA_1(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_1)
+);
+
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'hBD, 8'h1F , 8'h02 }),
+	.needmatches(8'd1)
+	) match_bytes_UA_2(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_2)
+);
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'h2C, 8'hC0 , 8'h02 }),
+	.needmatches(8'd1)
+	) match_bytes_UA_3(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_3)
+);
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'h8D, 8'hC0 , 8'h02 }),
+	.needmatches(8'd1)
+	) match_bytes_UA_4(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_4)
+);
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'hAD, 8'hC0 , 8'h02 }),
+	.needmatches(8'd1)
+	) match_bytes_UA_5(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_5)
+);
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'h2C, 8'hC0 , 8'h0F }),
+	.needmatches(8'd1)
+	) match_bytes_UA_6(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchUA_6)
+);
+/*
+bool CartDetector::isProbablyUA(const ByteBuffer& image, size_t size)
+{
+  // UA cart bankswitching switches to bank 1 by accessing address 0x240
+  // using 'STA $240' or 'LDA $240'
+  // Similar Brazilian (Digivison) cart bankswitching switches to bank 1 by accessing address 0x2C0
+  // using 'BIT $2C0', 'STA $2C0' or 'LDA $2C0'
+  // Other Brazilian (Atari Mania) ROM's bankswitching switches to bank 1 by accessing address 0xFC0
+  // using 'BIT $FA0', 'BIT $FC0' or 'STA $FA0'
+  uInt8 signature[7][3] = {
+    { 0x8D, 0x40, 0x02 },  // STA $240 (Funky Fish, Pleiades)
+    { 0xAD, 0x40, 0x02 },  // LDA $240 (???)
+    { 0xBD, 0x1F, 0x02 },  // LDA $21F,X (Gingerbread Man)
+    { 0x2C, 0xC0, 0x02 },  // BIT $2C0 (Time Pilot)
+    { 0x8D, 0xC0, 0x02 },  // STA $2C0 (Fathom, Vanguard)
+    { 0xAD, 0xC0, 0x02 },  // LDA $2C0 (Mickey)
+    { 0x2C, 0xC0, 0x0F }   // BIT $FC0 (H.E.R.O., Kung-Fu Master)
+  };
+  for(uInt32 i = 0; i < 7; ++i)
+    if(searchForBytes(image, size, signature[i], 3))
+      return true;
+
+  return false;
+}
+*/
 
 //------------------------------
 // SC detector

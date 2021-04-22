@@ -21,6 +21,9 @@ int ioctl_next_addr = 0x0;
 void ioctl_download_before_eval(void);
 void ioctl_download_after_eval(void);
 
+char *a[] = { "00", "F8", "F6", "FE", "E0", "3F", "F4","P2",
+"FA", "CV", "2K", "UA", "E7", "F0", "32", "AR"};
+
 
 int verilate() {
 static int clkdiv=3;
@@ -55,8 +58,9 @@ static int clkdiv=3;
 
 	if (top->clk_sys ) 
 		ioctl_download_before_eval();
-	else if (ioctl_file)
-		printf("skipping download this cycle %d\n",top->clk_sys);
+	else if (ioctl_file) {
+		//printf("skipping download this cycle %d\n",top->clk_sys);
+	}
 
 
 
@@ -91,7 +95,7 @@ int nextchar = 0;
 void ioctl_download_before_eval()
 {
 	if (ioctl_file) {
-printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
+//printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
 	    if (top->ioctl_wait==0) {
 	    top->ioctl_download=1;
 	    top->ioctl_wr = 1;
@@ -99,9 +103,9 @@ printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
 	    if (feof(ioctl_file)) {
 		    fclose(ioctl_file);
 		    ioctl_file=NULL;
-			top->ioctl_download=0;
-	    	top->ioctl_wr = 0;
-			printf("finished upload\n");
+                    top->ioctl_download=0;
+                    top->ioctl_wr = 0;
+                    //printf("finished upload\n");
 
 	    }
 	    	if (ioctl_file) {
@@ -110,7 +114,7 @@ printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
 	    		if (curchar!=EOF) {
 	    		//top->ioctl_dout=(char)curchar;
 	    		nextchar=curchar;
-printf("ioctl_download_before_eval: dout %x \n",top->ioctl_dout);
+                        //printf("ioctl_download_before_eval: dout %x \n",top->ioctl_dout);
 	    		ioctl_next_addr++;
 	    		}
 	    	}
@@ -124,41 +128,28 @@ printf("ioctl_download_before_eval: dout %x \n",top->ioctl_dout);
 }
 void ioctl_download_after_eval()
 {
-    top->ioctl_addr=ioctl_next_addr;
+   top->ioctl_addr=ioctl_next_addr;
    top->ioctl_dout=(unsigned char)nextchar;
-if (ioctl_file) printf("ioctl_download_after_eval %x wr %x dl %x\n",top->ioctl_addr,top->ioctl_wr,top->ioctl_download);
+   //if (ioctl_file) printf("ioctl_download_after_eval %x wr %x dl %x\n",top->ioctl_addr,top->ioctl_wr,top->ioctl_download);
 }
-
-void start_load_rom() {
-printf("load rom here\n");
- ioctl_download_setfile("../release-WIP/boot.rom",0);
-
-}
-
-void start_load_cart() {
-printf("load cart here\n");
- ioctl_download_setfile("../release-WIP/asteroids.a78",1);
-}
-void start_load_cart_3() {
-printf("load cart here\n");
- ioctl_download_setfile("../release-WIP/DiagCart2.a78",1);
-}
-void start_load_cart_2() {
-printf("load cart here 2\n");
- ioctl_download_setfile("../release-WIP/PolePositionII.a78",1);
-}
-
 
 
 int main(int argc, char *argv[]) 
 {
  	top = new Vtop();
         Verilated::commandArgs(argc, argv);
-	fprintf(stderr,"main\n");
- 	ioctl_download_setfile("tron.bin",1);
+	//fprintf(stderr,"main\n");
+	//fprintf(stderr,"opening: %d %s\n",argc, argv[1]);
+        
+        if (argc>1)  {
+		//fprintf(stderr,"opening: %s\n",argv[1]);
+ 		ioctl_download_setfile(argv[1],1);
+	}
+	else
+ 		ioctl_download_setfile("tron.bin",1);
         while(!top->done)
         	for (int step = 0; step < 1024; step++) verilate();     // Simulates MUCH faster if it's done in batches.
 
-	fprintf(stderr,"result: %x\n",top->bs);
+	fprintf(stdout,"%x,%s\n",top->bs,a[top->bs]);
 }
 

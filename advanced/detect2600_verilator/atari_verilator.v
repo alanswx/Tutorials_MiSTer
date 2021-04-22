@@ -53,18 +53,26 @@ detect2600 detect2600
 );
 
 reg last_ioctl_download;
+reg almostdone;
 always_ff @(posedge clk_sys) begin
-        if (reset)
+        if (reset) begin
 		done<=0;
+		almostdone<=0;
+	end
         last_ioctl_download <= ioctl_download;
 	if (ioctl_download && ioctl_wr) begin
 		cart_size <= ioctl_addr  + 1'b1; // 32 bit 1
-        	$display("cart_download: writing x's %b @ %x", ioctl_dout, ioctl_addr);
+        	//$display("cart_download: writing x's %b @ %x", ioctl_dout, ioctl_addr);
+        	//$display("forcebs,%x,cart_size,%x,sc,%x",force_bs,cart_size,sc);
 	end
         if (last_ioctl_download==1 && ioctl_download==0) begin
-        	$display("forcebs: %x cart_size: %x sc %x",force_bs,cart_size,sc);
-		done<=1;
+		almostdone<=1;
+	end
+	if (almostdone==1) begin
+                almostdone<=0;
+        	$display("forcebs,%x,cart_size,%x,sc,%x",force_bs,cart_size,sc);
 		bs<=force_bs;
+                done<=1;
 	end
 end
  
