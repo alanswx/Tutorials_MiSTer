@@ -3,7 +3,7 @@ module detect2600
 (
 	input clk,
 	input reset,
-	input [12:0] addr,
+	input [15:0] addr,
 	input enable,
 	input [31:0] cart_size,
 	input [7:0] data,
@@ -32,6 +32,7 @@ wire hasMatch3F;
 `include "cart_constants.vh"
 
 always @(posedge clk) begin
+sc<=0;
 if (hasMatchFE) force_bs<=BANKFE;
 else if (hasMatchE0 && cart_size=='d8192) force_bs<=BANKE0;
 else if (hasMatch3F && cart_size>'d4096) force_bs<=BANK3F;
@@ -45,11 +46,20 @@ else if (cart_size == 'h6300) force_bs<=BANKAR; //  multiple of 8448 is cassette
 else if (cart_size == 'h8400) force_bs<=BANKAR; //  multiple of 8448 is cassette  AR 
 else if (cart_size <= 'h0800) force_bs<=BANK2K; //  2k and less
 else if (cart_size <= 'h1000) force_bs<=BANK00; //  4k and less
-else if (cart_size <= 'h2000) force_bs<=BANKF8; //  8k and less
+else if (cart_size <= 'h2000) begin 
+	force_bs<=BANKF8; //  8k and less
+        sc <= has_sc;
+end
 else if (cart_size >= 'h2800 && cart_size <= 'h2900) force_bs<=BANKP2; // 10k+256 and less, should be > 10k < 10k+256?
 else if (cart_size <= 'h3000) force_bs<=BANKFA; // 12k and less
-else if (cart_size <= 'h4000) force_bs<=BANKF6; // 16k and less
-else if (cart_size <= 'h8000) force_bs<=BANKF4; // 32k and less
+else if (cart_size <= 'h4000) begin
+	force_bs<=BANKF6; // 16k and less
+        sc <= has_sc;
+end
+else if (cart_size <= 'h8000) begin
+	force_bs<=BANKF4; // 32k and less
+        sc <= has_sc;
+end
 else if (cart_size < 'h10000) force_bs<=BANK32; // 64k and less
 else if (cart_size == 'h10000) force_bs<=BANKF0; // 64k  - there are a few checks here
 else force_bs<=0;
@@ -640,25 +650,40 @@ bool CartDetector::isProbablySC(const ByteBuffer& image, size_t size)
 
 // grab and save the CRC for the first 128 bytes
 // each 4k check 128 bytes, and fail if CRC doesn't match
-reg [31:0] sc_crc0,sc_crc1;
+reg [31:0] sc_crc0,sc_crc1,sc_crc2;
+reg has_sc;
+
+// 80 - 100
 
 always @(posedge clk) begin
 	if (enable) begin
-		if (addr < 13'h80) begin
+		if (addr < 16'h80) begin
 			if (addr==0)
 			begin
 				sc_crc1<=0;
-				sc<=0;
+				has_sc<=0;
 				sc_crc0<=nextCRC32_D8(data,32'b0);
 			end
 			else
 				sc_crc0<=nextCRC32_D8(data,sc_crc0);
 		end
-		else if (addr >= 13'h1000 && addr < 13'h1080) begin
+		else if (addr >= 16'h80 && addr < 16'h100) begin
 			sc_crc1<=nextCRC32_D8(data,sc_crc1);
 		end
-		else if (addr==13'h1080) begin
-			sc<= (sc_crc0==sc_crc1);
+		else if (addr==16'h100) begin
+			has_sc<= (sc_crc0==sc_crc1);
+			sc_crc0<=0;
+			sc_crc1<=0;
+		end
+		if (addr >= 16'h1000 && addr < 16'h1080) begin
+			sc_crc0<=nextCRC32_D8(data,sc_crc0);
+		end
+		else if (addr >= 16'h1080 && addr < 16'h1100) begin
+			sc_crc1<=nextCRC32_D8(data,sc_crc1);
+		end
+		else if (addr==16'h1100) begin
+                        if (has_sc)
+				has_sc<= (sc_crc0==sc_crc1);
 		end
 	end
 end
@@ -740,7 +765,7 @@ module match_bytes
 (
 	input clk,
 	input reset,
-	input  [12:0] addr,
+	input  [15:0] addr,
 	input  enable,
 	input  [7:0] data,     // data in,
 	output reg hasMatch
@@ -759,7 +784,7 @@ begin
 	if (enable)
 	begin
 		// use address 0 as reset since reset is high during cart loads
-		if (addr==13'b0)
+		if (addr==16'b0)
 		begin
 			curMatch<=8'b0;
 			hasMatch<=0;

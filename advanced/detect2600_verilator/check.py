@@ -34,6 +34,7 @@ with open('2600mapper.csv') as csv_file:
                 cart_data.append(the_cart)
           except:
 		print("missing",row[0])
+		the_cart['NAME']=row[0]
                 missing.append(the_cart)
           
        line_count=line_count+1;

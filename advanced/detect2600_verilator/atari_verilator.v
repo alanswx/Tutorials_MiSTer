@@ -44,7 +44,7 @@ detect2600 detect2600
 (
 	.reset(reset),
 	.clk(clk_sys),
-	.addr(ioctl_addr[12:0]),
+	.addr(ioctl_addr[15:0]),
 	.enable(ioctl_wr & ioctl_download),
 	.data(ioctl_dout),
 	.force_bs(force_bs),
