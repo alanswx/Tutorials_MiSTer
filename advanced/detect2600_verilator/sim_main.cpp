@@ -1,3 +1,12 @@
+/*
+
+   simple verilator main 
+   Copyright 2021 Alan Steremberg, alanswx
+
+   This is the c code that calls into the verilog.
+   it communicates with the top, to send and receive data
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -116,15 +125,20 @@ void ioctl_download_after_eval() {
 }
 
 int main(int argc, char * argv[]) {
+
+  // instantiate verilator class
   top = new Vtop();
   Verilated::commandArgs(argc, argv);
 
+  // set the rom we want to send to ioctl_download
   if (argc > 1) {
     ioctl_download_setfile(argv[1], 1);
   } else
     ioctl_download_setfile("tron.bin", 1);
+
+  // this verilog sets a done flag as a wire when it is finished detecting the rom
   while (!top -> done)
-    for (int step = 0; step < 1024; step++) verilate(); // Simulates MUCH faster if it's done in batches.
+    verilate();   // verilate calls half a clock cycle to the verilog
 
   fprintf(stdout, "%x,%s\n", top -> bs, bank_type_name[top -> bs]);
 }
