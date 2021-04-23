@@ -2,7 +2,7 @@
 
 The original 2600 core didn't autodetect carts. Instead it used a wildcard in the config string, and it looked at the file extension to pick a mapper. This meant that each cartridge needed to be named correctly. 
 
-The [Stella Cart Detector](https://github.com/stella-emu/stella/blob/916a2cdfff0a79ef39942bf12fce4974f6bc51ac/src/emucore/CartDetector.cxx) uses a bunch of heuristics to search through the cartridge for known opcodes to detect the cart type.
+The [Stella Cart Detector](https://github.com/stella-emu/stella/blob/916a2cdfff0a79ef39942bf12fce4974f6bc51ac/src/emucore/CartDetector.cxx) uses a bunch of heuristics to search through the cartridge for known opcodes to detect the cart type.  Another [list of mappers](http://www.classic-games.com/atari2600/bankswitch.html)
 
 In C:
 
