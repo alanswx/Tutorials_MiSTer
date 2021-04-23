@@ -27,7 +27,6 @@ char * bank_type_name [] = { "00", "F8", "F6", "FE",
                            };
 
 int verilate() {
-  static int clkdiv = 3;
 
   if (!Verilated::gotFinish()) {
     if (main_time < 48) {
@@ -37,17 +36,12 @@ int verilate() {
       top -> reset = 0; // Deassert reset.
     }
     if ((main_time & 1) == 0) {
-      //			top->clk_sys = 0;       // Toggle clock
-      if (!clkdiv) {}
+      // Toggle clock
       top -> clk_sys = 0;
+     // clk_vid should be divided..
       top -> clk_vid = 0;
     }
     if ((main_time & 1) == 1) {
-      //			top->clk_sys = 1;
-      if (!clkdiv) {
-        clkdiv = 3;
-      }
-      clkdiv--;
       top -> clk_sys = 1;
       top -> clk_vid = 1;
 
