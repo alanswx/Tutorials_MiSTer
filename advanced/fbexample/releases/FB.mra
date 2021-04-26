@@ -1,0 +1,13 @@
+<misterromdescription>
+	<name>Journey</name>
+	<mameversion>0216</mameversion>
+	<mratimestamp>201912310000</mratimestamp>
+	<year>1984</year>
+	<manufacturer>Bally Midway</manufacturer>
+	<category>Action</category>
+	<rbf>FBExample</rbf>
+	<setname>image</setname>
+	<rom index="1" zip="wallpaper1.zip" address="0x30000000" md5="none" >
+		<part name="wallpaper1.img"/>
+	</rom>
+</misterromdescription>
