@@ -267,30 +267,7 @@ wire reset = RESET | status[0] | buttons[1];
 
 wire [1:0] col = status[4:3];
 
-wire HBlank;
-wire HSync;
-wire VBlank;
-wire VSync;
-wire ce_pix;
-wire [7:0] video;
 
-mycore mycore
-(
-	.clk(clk_sys),
-	.reset(reset),
-	
-	.pal(status[2]),
-	.scandouble(forced_scandoubler),
-
-	.ce_pix(ce_pix),
-
-	.HBlank(HBlank),
-	.HSync(HSync),
-	.VBlank(VBlank),
-	.VSync(VSync),
-
-	.video(video)
-);
 
 assign CLK_VIDEO = clk_720p;
 assign CE_PIXEL = 1;
@@ -298,10 +275,9 @@ assign CE_PIXEL = 1;
 assign VGA_DE = de;
 assign VGA_HS = hsync;
 assign VGA_VS = vsync;
-assign VGA_G  = (!col || col == 2) ? video : 8'd0;
-assign VGA_R  = (!col || col == 1) ? video : 8'd0;
-assign VGA_B  = (!col || col == 3) ? video : 8'd0;
-
+assign VGA_G  =  8'hFF;
+assign VGA_R  =  8'hFF; 
+assign VGA_B  =  8'hFF;
 
 /*
 	// Use framebuffer in DDRAM (USE_FB=1 in qsf)
