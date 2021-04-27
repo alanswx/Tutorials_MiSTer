@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 // (c) 2015 Till Harbaum
 
 module soc (

@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 // A simple system-on-a-chip (SoC) for the MiST
 // (c) 2015 Till Harbaum
 
