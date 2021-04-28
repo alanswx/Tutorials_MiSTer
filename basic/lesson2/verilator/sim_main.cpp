@@ -13,7 +13,8 @@
 
 
 #include "imgui.h"
-#ifndef WIN32
+#ifndef _MSC_VER
+
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl2.h"
 #include <stdio.h>
@@ -21,6 +22,7 @@
 #include <SDL_opengl.h>
 
 #else
+#define WIN32
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>

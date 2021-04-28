@@ -92,5 +92,8 @@
     <ClInclude Include="obj_dir\Vvga__Syms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vinc\verilated.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
