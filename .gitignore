@@ -38,3 +38,6 @@ c5_pin_model_dump.txt
 *.cdf
 *.qarlog
 qar_info.json
+.vs
+Debug
+Release

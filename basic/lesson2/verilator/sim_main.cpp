@@ -12,10 +12,10 @@
 #include "Vtop.h"
 
 
-#include "../imgui/imgui.h"
-#ifndef WINDOWS
-#include "../imgui/imgui_impl_sdl.h"
-#include "../imgui/imgui_impl_opengl2.h"
+#include "imgui.h"
+#ifndef WIN32
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl2.h"
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -34,7 +34,7 @@
 FILE *ioctl_file=NULL;
 int ioctl_next_addr = 0x0;
 
-#ifndef WINDOWS
+#ifndef WIN32
 SDL_Renderer * renderer =NULL;
 SDL_Texture * texture =NULL;
 #else
@@ -130,7 +130,7 @@ void ioctl_download_before_eval(void);
 void ioctl_download_after_eval(void);
 
 
-#ifdef WINDOWS
+#ifdef WIN32
 // Data
 static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
@@ -225,26 +225,40 @@ vluint64_t main_time = 0;	// Current simulation time.
 
 unsigned char buffer[16];
 
+
+uint32_t *bios_ptr = NULL;
+uint32_t *cart_ptr = NULL;
+uint32_t *ram_ptr = NULL;
+uint32_t *vram_ptr = NULL;
+uint32_t *disp_ptr = NULL;
+uint32_t *vga_ptr = NULL;
+
+
+
 unsigned int bios_size = 1024 * 256 * 4;		// 1MB. (32-bit wide).
-uint32_t *bios_ptr = (uint32_t *) malloc(bios_size);
+//uint32_t *bios_ptr = (uint32_t *) malloc(bios_size);
 
 unsigned int cart_size = 1024 * 1024 * 4;		// 16MB. (32-bit wide).
-uint32_t *cart_ptr = (uint32_t *)malloc(cart_size);
+//uint32_t *cart_ptr = (uint32_t *)malloc(cart_size);
 
 unsigned int ram_size = 1024 * 512 * 4;		// 2MB. (32-bit wide).
-uint32_t *ram_ptr = (uint32_t *) malloc(ram_size);
+//uint32_t *ram_ptr = (uint32_t *) malloc(ram_size);
 
 unsigned int vram_size = 1024 * 1024 * 4;	// 4MB. (32-bit wide).
-uint32_t *vram_ptr = (uint32_t *) malloc(vram_size);
+//uint32_t *vram_ptr = (uint32_t *) malloc(vram_size);
 
 #define VGA_WIDTH 1024
 #define VGA_HEIGHT 1024
 
+unsigned int jdisp_size = 1024 * 1024 * 4;	// 4MB. (32-bit wide).
+//uint32_t *jptr = (uint32_t *)malloc(jdisp_size);
+
+
 unsigned int disp_size = 1024 * 1024 * 4;	// 4MB. (32-bit wide).
-uint32_t *disp_ptr = (uint32_t *)malloc(disp_size);
+//uint32_t *disp_ptr = (uint32_t *)malloc(disp_size);
 
 uint32_t vga_size  = 1024 * 1024 * 4;		// 4MB. (32-bit wide).
-uint32_t *vga_ptr  = (uint32_t *) malloc(vga_size);
+//uint32_t *vga_ptr  = (uint32_t *) malloc(vga_size);
 
 
 uint32_t first_cmd_word = 0;
@@ -715,8 +729,8 @@ printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
 	    }
 	    	if (ioctl_file) {
 	    		int curchar = fgetc(ioctl_file);
-		
-	    		if (curchar!=EOF) {
+				if (feof(ioctl_file) == 0) {
+//	    		if (curchar!=EOF) {
 	    		//top->ioctl_dout=(char)curchar;
 	    		nextchar=curchar;
 printf("ioctl_download_before_eval: dout %x \n",top->ioctl_dout);
@@ -740,7 +754,7 @@ if (ioctl_file) printf("ioctl_download_after_eval %x wr %x dl %x\n",top->ioctl_a
 
 void start_load_image() {
 printf("load image here\n");
- ioctl_download_setfile("../Image\ Examples/bird.bin",0);
+ ioctl_download_setfile("..\\Image Examples\\bird.bin",0);
 
 }
 
@@ -750,11 +764,21 @@ int my_count = 0;
 static MemoryEditor mem_edit_1;
 
 int main(int argc, char** argv, char** env) {
-#ifdef WINDOWS
+
+	bios_ptr = (uint32_t *)malloc(bios_size);
+	cart_ptr = (uint32_t *)malloc(cart_size);
+	ram_ptr = (uint32_t *)malloc(ram_size);
+	vram_ptr = (uint32_t *)malloc(vram_size);
+	disp_ptr = (uint32_t *)malloc(disp_size);
+	vga_ptr = (uint32_t *)malloc(vga_size);
+
+
+#ifdef WIN32
 	// Create application window
 	WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
 	RegisterClassEx(&wc);
 	HWND hwnd = CreateWindow(wc.lpszClassName, _T("Dear ImGui DirectX11 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+	top = new Vtop();
 
 	// Initialize Direct3D
 	if (CreateDeviceD3D(hwnd) < 0)
@@ -799,7 +823,7 @@ int main(int argc, char** argv, char** env) {
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 
-#ifdef WINDOWS
+#ifdef WIN32
 	// Setup Platform/Renderer bindings
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
@@ -844,7 +868,7 @@ int main(int argc, char** argv, char** env) {
 	int width = 1024;
 	int height = 512;
 
-#ifdef WINDOWS
+#ifdef WIN32
 	// Upload texture to graphics system
 	D3D11_TEXTURE2D_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -919,7 +943,7 @@ int main(int argc, char** argv, char** env) {
 
 	static bool show_app_console = true;
 
-#ifdef WINDOWS
+#ifdef WIN32
 	// imgui Main loop stuff...
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
@@ -1006,7 +1030,7 @@ int main(int argc, char** argv, char** env) {
 		
 
 
-#ifdef WINDOWS
+#ifdef WIN32
 		// Update the texture!
 		// D3D11_USAGE_DEFAULT MUST be set in the texture description (somewhere above) for this to work.
 		// (D3D11_USAGE_DYNAMIC is for use with map / unmap.) ElectronAsh.
@@ -1039,7 +1063,7 @@ int main(int argc, char** argv, char** env) {
 			if (multi_step) for (int step = 0; step < multi_step_amount; step++) verilate();
 		}
 	}
-#ifdef WINDOWS
+#ifdef WIN32
 	// Close imgui stuff properly...
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
