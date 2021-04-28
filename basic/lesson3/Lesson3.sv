@@ -246,7 +246,19 @@ wire hblank, vblank;
 wire interlace;
 wire copy_in_progress;
 
+soc soc(
+   .clk_sys(clk_sys), // wrong
+   .pixel_clock(clk_sys), // wrong
+   .progress(copy_in_progress),
+   .VGA_HS(VGA_HS),
+   .VGA_VS(VGA_VS),
+   .VGA_R(VGA_R),
+   .VGA_G(VGA_G),
+   .VGA_B(VGA_B),
+   .VGA_DE(VGA_DE)
+);
 
+`ifdef removethis
 
 // include VGA controller
 vga vga (
@@ -311,7 +323,19 @@ boot_rom boot_rom (
 	.q       ( rom_data_out   )
 );
 
+
+dpram #( .init_file("image.hex"),.widthad_a(12),.width_a(8)) vmem
+(
+        .clock_a(cpu_clock),
+        .address_a(cpu_addr[11:0]),
+        .wren_a(!cpu_wr_n && cpu_addr[15]),
+        .q_a(ram_data_out),
+        .data_a(cpu_dout),
+
+);
+
 // include 4k RAM
+/*
 ram4k ram4k (
 	.clock   ( cpu_clock                 ),
 	.address ( cpu_addr[11:0]            ),
@@ -319,8 +343,8 @@ ram4k ram4k (
 	.data    ( cpu_dout                  ),
 	.q       ( ram_data_out              )
 );
-	
+*/	
 
-
+`endif
 
 endmodule
