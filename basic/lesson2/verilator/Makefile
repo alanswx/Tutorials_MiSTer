@@ -43,7 +43,7 @@ ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
 	CFLAGS = $(CXXFLAGS)
 endif
 
-CFLAGS += $(CC_OPT) $(CC_DEFINE)
+CFLAGS += $(CC_OPT) $(CC_DEFINE) 
 LDFLAGS = $(LIBS)
 EXE = ./tmp/Vtop
 #V_OPT = -O2 
@@ -59,7 +59,7 @@ V_SRC = \
 	$(RTL)/vga.v
 
 C_SRC = \
-	sim_main.cpp  imgui/imgui_impl_sdl.cpp imgui/imgui_impl_opengl2.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui.cpp
+	sim_main.cpp  imgui/imgui_impl_sdl.cpp imgui/imgui_impl_opengl2.cpp imgui/imgui_draw.cpp imgui/imgui_widgets.cpp imgui/imgui.cpp imgui/imgui_tables.cpp
 VOUT = tmp/Vtop.cpp
 
 all: $(EXE)

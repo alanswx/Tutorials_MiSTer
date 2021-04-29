@@ -12,17 +12,18 @@
 #include "Vtop.h"
 
 
-#include "imgui.h"
 #ifndef _MSC_VER
+#include "imgui/imgui.h"
 
-#include "imgui_impl_sdl.h"
-#include "imgui_impl_opengl2.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_opengl2.h"
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 
 #else
 #define WIN32
+#include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
@@ -681,7 +682,7 @@ static int clkdiv=3;
 	if (top->clk_sys ) 
 		ioctl_download_before_eval();
 	else if (ioctl_file)
-		printf("skipping download this cycle %d\n",top->clk_sys);
+		console.AddLog("skipping download this cycle %d\n",top->clk_sys);
 
 
 
@@ -710,13 +711,13 @@ void ioctl_download_setfile(char *file, int index)
 	top->ioctl_addr=ioctl_next_addr;
 	top->ioctl_index = index;
     ioctl_file=fopen(file,"rb");
-    if (!ioctl_file) printf("error opening %s\n",file);
+    if (!ioctl_file) console.AddLog("error opening %s\n",file);
 }
 int nextchar = 0;
 void ioctl_download_before_eval()
 {
 	if (ioctl_file) {
-printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
+console.AddLog("ioctl_download_before_eval %x\n",top->ioctl_addr);
 	    if (top->ioctl_wait==0) {
 	    top->ioctl_download=1;
 	    top->ioctl_wr = 1;
@@ -726,7 +727,7 @@ printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
 		    ioctl_file=NULL;
 			top->ioctl_download=0;
 	    	top->ioctl_wr = 0;
-			printf("finished upload\n");
+			console.AddLog("finished upload\n");
 
 	    }
 	    	if (ioctl_file) {
@@ -735,7 +736,7 @@ printf("ioctl_download_before_eval %x\n",top->ioctl_addr);
 //	    		if (curchar!=EOF) {
 	    		//top->ioctl_dout=(char)curchar;
 	    		nextchar=curchar;
-printf("ioctl_download_before_eval: dout %x \n",top->ioctl_dout);
+console.AddLog("ioctl_download_before_eval: dout %x \n",top->ioctl_dout);
 	    		ioctl_next_addr++;
 	    		}
 	    	}
@@ -751,21 +752,26 @@ void ioctl_download_after_eval()
 {
     top->ioctl_addr=ioctl_next_addr;
    top->ioctl_dout=(unsigned char)nextchar;
-if (ioctl_file) printf("ioctl_download_after_eval %x wr %x dl %x\n",top->ioctl_addr,top->ioctl_wr,top->ioctl_download);
+if (ioctl_file) console.AddLog("ioctl_download_after_eval %x wr %x dl %x\n",top->ioctl_addr,top->ioctl_wr,top->ioctl_download);
 }
 
 void start_load_image() {
-printf("load image here\n");
+console.AddLog("load image here\n");
+#ifdef WIN32
  ioctl_download_setfile("..\\Image Examples\\bird.bin",0);
+#else
+ ioctl_download_setfile("../Image Examples/bird.bin",0);
+#endif
 
 }
 
 
 int my_count = 0;
 
-static MemoryEditor mem_edit_1;
+MemoryEditor mem_edit_1;
 
 int main(int argc, char** argv, char** env) {
+
 
 	bios_ptr = (uint32_t *)malloc(bios_size);
 	cart_ptr = (uint32_t *)malloc(cart_size);
@@ -1005,10 +1011,14 @@ int main(int argc, char** argv, char** env) {
 		ShowExampleAppConsole(&show_app_console);
 
 
+
+
 		if (ImGui::Button("RESET")) main_time = 0;
 		if (ImGui::Button("LOAD IMAGE")) start_load_image();
 		ImGui::Text("main_time %d", main_time);
 		ImGui::Text("frame_count: %d  line_count: %d", frame_count, line_count);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
 
 		ImGui::Checkbox("RUN", &run_enable);
 
@@ -1028,7 +1038,9 @@ int main(int argc, char** argv, char** env) {
 		ImGui::Image(my_tex_id, ImVec2(width, height));
 		ImGui::End();
 
-
+		ImGui::Begin("RAM Editor");
+        	mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
+        	ImGui::End();
 		
 
 
@@ -1059,7 +1071,7 @@ int main(int argc, char** argv, char** env) {
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
 #endif
-		if (run_enable) for (int step = 0; step < 1024; step++) verilate();	// Simulates MUCH faster if it's done in batches.
+		if (run_enable) for (int step = 0; step < 1024*10; step++) verilate();	// Simulates MUCH faster if it's done in batches.
 		else {																// But, that will affect the values we can grab for the GUI.
 			if (single_step) verilate();
 			if (multi_step) for (int step = 0; step < multi_step_amount; step++) verilate();
