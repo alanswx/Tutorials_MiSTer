@@ -74,11 +74,7 @@ T80s T80s (
 );
 */
 
-tv80s T80x  (/*AUTOARG*/
-//  m1_n, mreq_n, iorq_n, rd_n, wr_n, rfsh_n, halt_n, busak_n, A, dout, 
-  // Inputs
-//  reset_n, clk, wait_n, int_n, nmi_n, busrq_n, di
-
+tv80s T80x  (
 	.reset_n( !cpu_reset    ),
 	.clk ( cpu_clock     ),
 	.wait_n ( 1'b1          ),
@@ -93,6 +89,7 @@ tv80s T80x  (/*AUTOARG*/
 	.dout ( cpu_dout      )
   );
 
+  
 // map 4k RAM into upper half of the address space (A15=1)
 // and 4k ROM into the lower half (A15=0)
 wire [7:0] ram_data_out, rom_data_out;

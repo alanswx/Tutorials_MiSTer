@@ -769,6 +769,8 @@ console.AddLog("load image here\n");
 int my_count = 0;
 
 MemoryEditor mem_edit_1;
+MemoryEditor mem_edit_2;
+MemoryEditor mem_edit_3;
 
 int main(int argc, char** argv, char** env) {
 
@@ -1038,12 +1040,39 @@ int main(int argc, char** argv, char** env) {
 		ImGui::Image(my_tex_id, ImVec2(width, height));
 		ImGui::End();
 
-		//ImGui::Begin("RAM Editor");
+		ImGui::Begin("ROM Editor");
         //mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
-        //ImGui::End();
+		mem_edit_1.DrawContents(top->top__DOT__soc__DOT__rom__DOT__mem, 4096, 0);
+		ImGui::End();
+		ImGui::Begin("RAM Editor");
+		//mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
+		mem_edit_1.DrawContents(top->top__DOT__soc__DOT__ram__DOT__mem, 4096, 0);
+		ImGui::End();
+		ImGui::Begin("VRAM Editor");
+		//mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
+		mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem, 16000, 0);
+		ImGui::End();
+
 		
+		ImGui::Begin("CPU Registers");
+		ImGui::Spacing();
+		ImGui::Text("PC      0x%04X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__PC);
+		ImGui::Text("Main Registers");
+		ImGui::Text("B       0x%02X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__B);
+		ImGui::Text("C       0x%02X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__C);
+		ImGui::Text("D       0x%02X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__D);
+		ImGui::Text("E       0x%02X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__E);
+		ImGui::Text("H       0x%02X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__H);
+		ImGui::Text("L       0x%02X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__L);
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Text("16 bit Registers");
+		ImGui::Text("IX      0x%04X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__IX);
+		ImGui::Text("IY      0x%04X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__i_reg__DOT__IY);
+		ImGui::Text("SP      0x%04X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__SP);
+		ImGui::Text("PC      0x%04X", top->top__DOT__soc__DOT__T80x__DOT__i_tv80_core__DOT__PC);
 
-
+		ImGui::End();
 #ifdef WIN32
 		// Update the texture!
 		// D3D11_USAGE_DEFAULT MUST be set in the texture description (somewhere above) for this to work.
