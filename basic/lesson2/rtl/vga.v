@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 // A simple system-on-a-chip (SoC) for the MiST
 // (c) 2015 Till Harbaum
 
@@ -12,10 +11,10 @@ module vga (
    input  pclk,
 	
 	// CPU interface (write only!)
-   input  ioctl_wr,
-   input [13:0] ioctl_addr,
-   input [7:0] ioctl_data,
-
+	input  cpu_clk,
+	input  cpu_wr,
+	input [13:0] cpu_addr,
+	input [7:0] cpu_data,
 		
    // VGA output
    output reg	hs,
@@ -73,24 +72,17 @@ end
 
 // read VRAM
 reg [13:0] video_counter;
-wire [7:0] pixel;
+reg [7:0] pixel;
 reg de;
 
-dpram #( .init_file("image.hex"),.widthad_a(14),.width_a(8)) vmem
-(
-	.clock_a(pclk),
-	.address_a(video_counter),
-	.wren_a(1'b0),
-	.q_a(pixel),
-	
-	.clock_b(pclk),
-	.wren_b(ioctl_wr),
-	.address_b(ioctl_addr),
-	.data_b(ioctl_data)
-);
+// 16000 bytes of internal video memory for 160x100 pixel at 8 Bit (RGB 332)
+reg [7:0] vmem [160*100-1:0];
 
 
-
+// write VRAM via CPU interface
+always @(posedge cpu_clk)
+	if(cpu_wr) 
+		vmem[cpu_addr] <= cpu_data;
 
 always@(posedge pclk) begin
         // The video counter is being reset at the begin of each vsync.
@@ -105,6 +97,9 @@ always@(posedge pclk) begin
 		if(h_cnt[1:0] == 2'b11)
 			video_counter <= video_counter + 14'd1;
 		
+		//pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:8'hff;    // checkboard
+		// pixel <= video_counter[7:0];                // color pattern
+		pixel <= vmem[video_counter];               // read VRAM
 		de<=1;
 	end else begin
 		if(h_cnt == H+HFP) begin
@@ -115,7 +110,7 @@ always@(posedge pclk) begin
 		de<=0;
 		end
 			
-		
+		pixel <= 8'h00;   // black
 	end
 end
 
@@ -123,9 +118,6 @@ end
 assign r = { pixel[7:5],  pixel[7:5] , pixel[7:6]};
 assign g = { pixel[4:2],  pixel[4:2] , pixel[4:3]};
 assign b = { pixel[1:0], pixel[1:0] , pixel[1:0],pixel[1:0] };
-
-
-
 
 // split the 8 rgb bits into the three base colors. Every second line is
 // darker to give some scanlines effect

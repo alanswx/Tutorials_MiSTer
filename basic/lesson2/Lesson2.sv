@@ -197,7 +197,6 @@ assign LED_USER  = copy_in_progress;
 `include "build_id.v"
 localparam CONF_STR = {
 	"Lesson2;;",
-	"F1,BIN;",
 	"-;",
 	"O89,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
@@ -212,10 +211,6 @@ localparam CONF_STR = {
 // HPS is the module that communicates between the linux and fpga
 //
 wire [31:0] status;
-wire        ioctl_download;
-wire  [7:0] ioctl_dout;
-wire        ioctl_wr;
-wire [26:0] ioctl_addr;
 
 hps_io #(.STRLEN(($size(CONF_STR)>>3)) , .PS2DIV(1000), .WIDE(0)) hps_io
 (
@@ -223,11 +218,6 @@ hps_io #(.STRLEN(($size(CONF_STR)>>3)) , .PS2DIV(1000), .WIDE(0)) hps_io
 	.HPS_BUS(HPS_BUS),
 	.status(status),
 
-	.ioctl_download(ioctl_download),
-	.ioctl_wr(ioctl_wr),
-	.ioctl_addr(ioctl_addr),
-	.ioctl_dout(ioctl_dout),
-	
 	.conf_str(CONF_STR)
 	
 );
@@ -260,15 +250,12 @@ wire [15:0] audio_l, audio_r;
 soc soc(
    .pixel_clock(CLK_VIDEO), // wrong
    .progress(copy_in_progress),
-   .ioctl_wr   ( ioctl_wr & ioctl_download),
-   .ioctl_addr ( ioctl_addr    ),
-   .ioctl_data ( ioctl_dout    ),
    .VGA_HS(VGA_HS),
    .VGA_VS(VGA_VS),
    .VGA_R(VGA_R),
    .VGA_G(VGA_G),
    .VGA_B(VGA_B),
-	.VGA_DE(VGA_DE)
+   .VGA_DE(VGA_DE)
 );
 
 endmodule
