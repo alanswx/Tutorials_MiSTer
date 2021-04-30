@@ -8,7 +8,7 @@ V = verilator
 COSIM = n
 
 TOP = --top-module top
-RTL = ../rtl
+RTL = ../solution/rtl
 V_INC = +incdir+$(RTL) 
 
 V_DEFINE = --timescale-override 1ns/1ps --timescale 1ns/1ps  +define+debug=1 +define+SIMULATION=1 
