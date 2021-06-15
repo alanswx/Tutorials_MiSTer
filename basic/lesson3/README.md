@@ -12,3 +12,4 @@ Load this project into quartus and build it. The RBF will be in the output_files
 
 ![](lesson3.png)
 
+# Step two run simulation in linux, mac or windows
