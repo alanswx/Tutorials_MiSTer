@@ -56,6 +56,8 @@
 # define WAVES 1  // Set backward compatibility flag
 #endif
 
+#include <sim_console.h>
+
 //=========================================================================
 // Basic types
 
@@ -422,6 +424,8 @@ public:
     static void randSeed(int val) VL_MT_SAFE;
     static int randSeed() VL_MT_SAFE { return s_s.s_randSeed; }  ///< Return randSeed value
 
+    static void setDebug(DebugConsole in);
+
     /// Enable debug of internal verilated code
     static void debug(int level) VL_MT_SAFE;
 #ifdef VL_DEBUG
@@ -629,6 +633,7 @@ extern void VL_FCLOSE_I(IData fdi);
 
 extern IData VL_FREAD_I(int width, int array_lsb, int array_size,
                         void* memp, IData fpi, IData start, IData count);
+
 
 extern void VL_WRITEF(const char* formatp, ...);
 extern void VL_FWRITEF(IData fpi, const char* formatp, ...);

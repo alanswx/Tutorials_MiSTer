@@ -23,7 +23,9 @@ module vga (
    output [7:0] r,
    output [7:0] g,
    output [7:0] b,
-	output VGA_DE
+   output VGA_HB,
+   output VGA_VB,
+   output VGA_DE
 );
 					
 // 640x400 70HZ VESA according to  http://tinyvga.com/vga-timing/640x400@70Hz
@@ -92,6 +94,14 @@ always@(posedge pclk) begin
         // VGA lines.
 
 	// visible area?
+        if(v_cnt < V)
+                VGA_VB<=0;
+        else
+                VGA_VB<=1;
+        if(h_cnt < H)
+                VGA_HB<=0;
+        else
+                VGA_HB<=1;
 	if((v_cnt < V) && (h_cnt < H)) begin
 		if(h_cnt[1:0] == 2'b11)
 			video_counter <= video_counter + 14'd1;

@@ -8,6 +8,8 @@ module soc (
    output [7:0] VGA_R,
    output [7:0] VGA_G,
    output [7:0] VGA_B,
+   output VGA_HB,
+   output VGA_VB,
    output VGA_DE
 );        
 
@@ -36,6 +38,8 @@ vga vga (
 	.r     (VGA_R),
 	.g     (VGA_G),
 	.b     (VGA_B),
+	.VGA_HB(VGA_HB),
+	.VGA_VB(VGA_VB),
 	.VGA_DE(VGA_DE)
 
 );

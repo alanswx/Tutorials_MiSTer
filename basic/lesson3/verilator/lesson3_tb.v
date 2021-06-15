@@ -7,7 +7,7 @@
 `define USE_VGA
 //`define USE_CGA
 
-module top(VGA_R,VGA_B,VGA_G,VGA_HS,VGA_VS,reset,clk_sys,clk_vid,ioctl_download,ioctl_addr,ioctl_dout,ioctl_index,ioctl_wait,ioctl_wr);
+module top(VGA_R,VGA_B,VGA_G,VGA_HS,VGA_VS,VGA_HB,VGA_VB,reset,clk_sys,clk_vid,ioctl_download,ioctl_addr,ioctl_dout,ioctl_index,ioctl_wait,ioctl_wr);
 
    input clk_sys/*verilator public_flat*/;
    input clk_vid/*verilator public_flat*/;
@@ -19,6 +19,9 @@ module top(VGA_R,VGA_B,VGA_G,VGA_HS,VGA_VS,reset,clk_sys,clk_vid,ioctl_download,
    
    output VGA_HS;
    output VGA_VS;
+   
+   output VGA_HB;
+   output VGA_VB;
    
    input        ioctl_download;
    input        ioctl_wr;
@@ -33,13 +36,15 @@ wire VGA_DE;
 wire copy_in_progress;
 soc soc(
    .clk_sys(clk_sys), // wrong
-   .pixel_clock(clk_vid), // wrong
+   .pixel_clock(clk_sys), // wrong
    .progress(copy_in_progress),
    .VGA_HS(VGA_HS),
    .VGA_VS(VGA_VS),
    .VGA_R(VGA_R),
    .VGA_G(VGA_G),
    .VGA_B(VGA_B),
+   .VGA_HB(VGA_HB),
+   .VGA_VB(VGA_VB),
    .VGA_DE(VGA_DE)
 );
 
