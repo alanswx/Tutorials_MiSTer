@@ -13,3 +13,5 @@ Load this project into quartus and build it. The RBF will be in the output_files
 ![](lesson3.png)
 
 # Step two run simulation in linux, mac or windows
+
+[Jimmy Stone's Verilator Template](https://github.com/JimmyStones/Verilator_Template)
