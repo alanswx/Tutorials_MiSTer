@@ -21,7 +21,7 @@
 
 // Debug GUI 
 // ---------
-const char* windowTitle = "Verilator Sim: Arcade-Centipede";
+const char* windowTitle = "Verilator Sim: Lesson3";
 bool showDebugWindow = true;
 const char* debugWindowTitle = "Virtual Dev Board v1.0";
 DebugConsole console;
