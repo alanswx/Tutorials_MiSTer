@@ -2,8 +2,7 @@ Lesson 3: Z80 CPU and RAM
 --------------------------
 
 
-
-[![Lesson 2 Video](http://img.youtube.com/vi/97o_aMsqumY/0.jpg)](http://www.youtube.com/watch?v=97o_aMsqumY "Lesson 2 Video")
+[![Lesson 3 Video](http://img.youtube.com/vi/K5M7aqQiXSI/0.jpg)](https://www.youtube.com/watch?v=K5M7aqQiXSI "Lesson 2 Video")
 
 
 # Step one build existing code
