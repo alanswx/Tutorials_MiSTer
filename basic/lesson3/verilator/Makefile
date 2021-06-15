@@ -55,7 +55,7 @@ CC_OPT = -O
 V_SRC = \
         lesson3_tb.v \
         $(RTL)/soc.v \
-        ram/bram.sv  \
+        $(RTL)/bram.sv  \
         $(RTL)/vga.v \
 ../rtl/tv80/tv80_core.v \
 ../rtl/tv80/tv80_alu.v \

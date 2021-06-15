@@ -23,8 +23,8 @@ module vga (
    output [7:0] r,
    output [7:0] g,
    output [7:0] b,
-   output VGA_HB,
-   output VGA_VB,
+   output reg VGA_HB,
+   output reg VGA_VB,
    output VGA_DE
 );
 					

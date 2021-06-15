@@ -6,5 +6,3 @@ set_global_assignment -name QIP_FILE sys/sys.qip
 set_global_assignment -name VERILOG_FILE rtl/vga.v
 set_global_assignment -name VERILOG_FILE rtl/soc.v
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/bram.sv
-set_global_assignment -name QIP_FILE boot_rom.qip
-set_global_assignment -name QIP_FILE ram4k.qip

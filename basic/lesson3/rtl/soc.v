@@ -2,7 +2,6 @@
 module soc (
    input  clk_sys,
    input  pixel_clock,
-   output reg progress,
    output VGA_HS,
    output VGA_VS,
    output [7:0] VGA_R,
@@ -19,7 +18,6 @@ wire vs,hs;
 wire ce_pix;
 wire hblank, vblank;
 wire interlace;
-wire copy_in_progress;
 
 
 
@@ -79,18 +77,18 @@ T80s T80s (
 */
 
 tv80s T80x  (
-	.reset_n( !cpu_reset    ),
-	.clk ( cpu_clock     ),
-	.wait_n ( 1'b1          ),
-	.int_n( 1'b1          ),
-	.nmi_n( 1'b1          ),
-	.busrq_n( 1'b1          ),
-	.mreq_n ( cpu_mreq_n    ),
-	.rd_n( cpu_rd_n      ), 
-	.wr_n( cpu_wr_n      ),
-	.A        ( cpu_addr      ),
-	.di ( cpu_din       ),
-	.dout ( cpu_dout      )
+	.reset_n   ( !cpu_reset    ),
+	.clk       ( cpu_clock     ),
+	.wait_n    ( 1'b1          ),
+	.int_n     ( 1'b1          ),
+	.nmi_n     ( 1'b1          ),
+	.busrq_n   ( 1'b1          ),
+	.mreq_n    ( cpu_mreq_n    ),
+	.rd_n      ( cpu_rd_n      ), 
+	.wr_n      ( cpu_wr_n      ),
+	.A         ( cpu_addr      ),
+	.di        ( cpu_din       ),
+	.dout      ( cpu_dout      )
   );
 
   
@@ -100,13 +98,7 @@ wire [7:0] ram_data_out, rom_data_out;
 assign cpu_din = cpu_addr[15]?ram_data_out:rom_data_out;
 
 // include 4k program code from boot_rom
-/*
-boot_rom boot_rom (
-	.clock   ( cpu_clock      ),
-	.address ( cpu_addr[11:0] ),
-	.q       ( rom_data_out   )
-);
-*/
+
 dpram #( .init_file("rom.hex"),.widthad_a(12),.width_a(8)) rom
 (
         .clock_a(cpu_clock),
@@ -135,16 +127,7 @@ dpram #( .init_file(""),.widthad_a(12),.width_a(8)) ram
 
 );
 
-// include 4k RAM
-/*
-ram4k ram4k (
-	.clock   ( cpu_clock                 ),
-	.address ( cpu_addr[11:0]            ),
-	.wren    ( !cpu_wr_n && cpu_addr[15] ),
-	.data    ( cpu_dout                  ),
-	.q       ( ram_data_out              )
-);
-*/	
+
 
 
 
