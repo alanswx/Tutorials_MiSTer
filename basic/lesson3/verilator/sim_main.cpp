@@ -52,7 +52,7 @@ const int input_pause = 11;
 // -----
 #define VGA_WIDTH 240
 #define VGA_HEIGHT 257
-#define VGA_ROTATE -1  // 90 degrees anti-clockwise
+#define VGA_ROTATE 0  // 90 degrees anti-clockwise
 SimVideo video(VGA_WIDTH, VGA_HEIGHT, VGA_ROTATE);
 
 // Simulation control
@@ -176,7 +176,7 @@ int main(int argc, char** argv, char** env) {
 	// Setup video output
 	if (video.Initialise(windowTitle) == 1) { return 1; }
 
-	bus.QueueDownload("bird.bin", 0);
+	//bus.QueueDownload("bird.bin", 0);
 
 
 #ifdef WIN32
@@ -247,11 +247,11 @@ int main(int argc, char** argv, char** env) {
                 ImGui::End();
                 ImGui::Begin("RAM Editor");
                 //mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
-                mem_edit_1.DrawContents(top->top__DOT__soc__DOT__ram__DOT__mem, 4096, 0);
+                mem_edit_2.DrawContents(top->top__DOT__soc__DOT__ram__DOT__mem, 4096, 0);
                 ImGui::End();
                 ImGui::Begin("VRAM Editor");
                 //mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
-                mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem, 16000, 0);
+                mem_edit_3.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem, 16000, 0);
                 ImGui::End();
 
 
