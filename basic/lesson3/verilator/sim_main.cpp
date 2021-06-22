@@ -50,8 +50,8 @@ const int input_pause = 11;
 
 // Video
 // -----
-#define VGA_WIDTH 240
-#define VGA_HEIGHT 257
+#define VGA_WIDTH 640
+#define VGA_HEIGHT 400
 #define VGA_ROTATE 0  // 90 degrees anti-clockwise
 SimVideo video(VGA_WIDTH, VGA_HEIGHT, VGA_ROTATE);
 
@@ -75,7 +75,7 @@ double sc_time_stamp() {	// Called by $time in Verilog.
 
 int clockSpeed = 24; // This is not used, just a reminder for the dividers below
 SimClock clk_sys(1); // 12mhz
-SimClock clk_pix(2); // 6mhz
+SimClock clk_pix(1); // 6mhz
 
 void resetSim() {
 	main_time = 0;
@@ -237,7 +237,7 @@ int main(int argc, char** argv, char** env) {
 		ImGui::Text("main_time: %d frame_count: %d sim FPS: %f", main_time, video.count_frame, video.stats_fps); 
 
 		// Draw VGA output
-		float m = 3.0;
+		float m = 1.0;
 		ImGui::Image(video.texture_id, ImVec2(video.output_width * m, video.output_height * m));
 		ImGui::End();
 
