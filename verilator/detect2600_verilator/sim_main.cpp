@@ -29,10 +29,12 @@ int ioctl_next_addr = 0x0;
 void ioctl_download_before_eval(void);
 void ioctl_download_after_eval(void);
 
-const char * bank_type_name [] = { "00", "F8", "F6", "FE", 
+char * bank_type_name [] = { "00", "F8", "F6", "FE", 
                              "E0", "3F", "F4", "P2", 
                              "FA", "CV", "2K", "UA",
-                             "E7", "F0", "32", "AR"
+                             "E7", "F0", "32", "AR",
+                             "3E", "SB", "WD", "EF",
+	
                            };
 
 int verilate() {
@@ -78,7 +80,7 @@ int verilate() {
   return 0;
 }
 
-void ioctl_download_setfile(const char * file, int index) {
+void ioctl_download_setfile(char * file, int index) {
   ioctl_next_addr = -1;
   top -> ioctl_addr = ioctl_next_addr;
   top -> ioctl_index = index;
