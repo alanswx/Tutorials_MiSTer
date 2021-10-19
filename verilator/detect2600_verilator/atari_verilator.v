@@ -29,10 +29,10 @@ module top(VGA_R,VGA_B,VGA_G,VGA_HS,VGA_VS,reset,clk_sys,clk_vid,ioctl_download,
    output reg done;
 
 
-   output reg [3:0] bs;
+   output reg [4:0] bs;
 
 
-wire [3:0] force_bs;
+wire [4:0] force_bs;
 wire sc;
 
 
@@ -61,7 +61,7 @@ always_ff @(posedge clk_sys) begin
 	end
         last_ioctl_download <= ioctl_download;
 	if (ioctl_download && ioctl_wr) begin
-		cart_size <= { 7'b0 , ioctl_addr } + 1'b1; // 32 bit 1
+		cart_size <= ioctl_addr  + 1'b1; // 32 bit 1
         	//$display("cart_download: writing x's %b @ %x", ioctl_dout, ioctl_addr);
         	//$display("forcebs,%x,cart_size,%x,sc,%x",force_bs,cart_size,sc);
 	end
