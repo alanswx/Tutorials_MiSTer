@@ -34,6 +34,7 @@ char * bank_type_name [] = { "00", "F8", "F6", "FE",
                              "FA", "CV", "2K", "UA",
                              "E7", "F0", "32", "AR",
                              "3E", "SB", "WD", "EF",
+                             "DPC+", "CTY", "CDF", "",
 	
                            };
 

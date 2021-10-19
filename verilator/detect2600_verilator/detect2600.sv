@@ -11,22 +11,6 @@ module detect2600
 	output reg sc
 );
 
-/*
-	if (ext == ".F8") force_bs <= 1;
-		if (ext == ".F6") force_bs <= 2;
-		if (ext == ".FE") force_bs <= 3;
-		if (ext == ".E0") force_bs <= 4;
-		if (ext == ".3F") force_bs <= 5;
-		if (ext == ".F4") force_bs <= 6;
-		if (ext == ".P2") force_bs <= 7; // Pitfall II
-		if (ext == ".FA") force_bs <= 8;
-		if (ext == ".CV") force_bs <= 9;
-		if (ext == ".UA") force_bs <= 11;
-		if (ext == ".E7") force_bs <= 12;
-		if (ext == ".F0") force_bs <= 13;
-		if (ext == ".32") force_bs <= 14;
-*/
-
 wire hasMatch3F;
 
 `include "cart_constants.vh"
@@ -39,6 +23,10 @@ else if (hasMatch3E && cart_size>'d4096)  force_bs<=BANK3E;
 else if (hasMatch3F && cart_size>'d4096) force_bs<=BANK3F;
 else if (hasMatchSB && cart_size>='d131072) force_bs<=BANKSB;
 else if (hasMatchEF && cart_size=='d65536 ) force_bs<=BANKEF;
+else if (hasMatchDPCP && cart_size=='d32768) force_bs<=BANKDPCP;
+else if (hasMatchCTY && cart_size=='d32768) force_bs<=BANKCTY;
+else if (hasMatchCTY && cart_size=='d61440) force_bs<=BANKCTY;
+else if (hasMatchCDF && cart_size>='d32768) force_bs<=BANKCDF;
 else if (hasMatchCV) force_bs<=BANKCV;
 else if (hasMatchE7) force_bs<=BANKE7;
 else if (cart_size == 'h2000 && hasMatchWD ) force_bs<=BANKWD; //  8k 
@@ -136,6 +124,69 @@ match_bytes #(
 	.data(data),
 	.hasMatch(hasMatchEF_3)
 );
+
+//----------------------------
+//  DPC+ detector
+//----------------------------
+wire hasMatchDPCP;
+match_bytes #(
+	.num_bytes(8'd4),
+	.pattern({ 8'h44, 8'h50 , 8'h43, 8'h2B }),
+	.needmatches(8'd2)
+	) match_bytes_DPCP(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchDPCP)
+);
+//----------------------------
+//  CTY detector
+//----------------------------
+wire hasMatchCTY;
+match_bytes #(
+	.num_bytes(8'd5),
+	.pattern({ 8'h4C, 8'h45 , 8'h4E, 8'h49, 8'h4E }),
+	.needmatches(8'd1)
+	) match_bytes_CTY(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchCTY)
+);
+
+wire hasMatchCDF =  hasMatchCDF_1  | hasMatchCDF_2;
+wire  hasMatchCDF_1,hasMatchCDF_2;
+
+match_bytes #(
+	.num_bytes(8'd3),
+	.pattern({ 8'h43, 8'h44 , 8'h46 }),
+	.needmatches(8'd3)
+	) match_bytes_CDF_1(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchCDF_1)
+);
+match_bytes #(
+	.num_bytes(8'd8),
+	.pattern({ 8'h50, 8'h4C , 8'h55, 8'h53, 8'h43, 8'h44, 8'h46, 8'h4A }),
+	.needmatches(8'd1)
+	) match_bytes_CDF_2(
+	.addr(addr),
+	.enable(enable),
+	.clk(clk),
+	.reset(reset),
+	.data(data),
+	.hasMatch(hasMatchCDF_2)
+);
+
+
 
 /*
 wire hasMatchEF = hasMatchEF_1 & hasMatchEF_2 & hasMatchEF_3 & hasMatchEF_4 ;
