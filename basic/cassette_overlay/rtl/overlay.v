@@ -132,7 +132,7 @@ begin
 			else
 				wr_data<='h7F; // filled bar
 			cur_block<=cur_block+'d1;
-			$display("cur_block: %d blocks: %d pos: %d max: %d increment: %d\n",cur_block,blocks,pos,max,increment);
+			//$display("cur_block: %d blocks: %d pos: %d max: %d increment: %d\n",cur_block,blocks,pos,max,increment);
 		end
 		2'b11:
 		begin

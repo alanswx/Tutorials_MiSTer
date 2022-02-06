@@ -58,13 +58,7 @@ V_SRC = \
         $(RTL)/charmap.v \
         $(RTL)/soc.v \
         $(RTL)/bram.sv  \
-        $(RTL)/vga.v \
-../rtl/tv80/tv80_core.v \
-../rtl/tv80/tv80_alu.v \
-../rtl/tv80/tv80_mcode.v \
-../rtl/tv80/tv80_reg.v \
-../rtl/tv80/tv80n.v \
-../rtl/tv80/tv80s.v
+        $(RTL)/vga.v 
 
 C_SRC = \
 	sim_main.cpp  \

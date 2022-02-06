@@ -14,8 +14,6 @@ module vga (
 	// CPU interface (write only!)
 	input  cpu_clk,
 	input  cpu_wr,
-	input [13:0] cpu_addr,
-	input [7:0] cpu_data,
 		
    // VGA output
    output reg	hs,
@@ -84,10 +82,6 @@ reg de;
 reg [7:0] vmem [160*100-1:0];
 
 
-// write VRAM via CPU interface
-always @(posedge cpu_clk)
-	if(cpu_wr) 
-		vmem[cpu_addr] <= cpu_data;
 
 always@(posedge pclk) begin
         // The video counter is being reset at the begin of each vsync.
@@ -111,8 +105,8 @@ always@(posedge pclk) begin
 			video_counter <= video_counter + 14'd1;
 		
 		//pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:8'hff;    // checkboard
-		// pixel <= video_counter[7:0];                // color pattern
-		pixel <= vmem[video_counter];               // read VRAM
+		 pixel <= video_counter[7:0];                // color pattern
+		//pixel <= vmem[video_counter];               // read VRAM
 		de<=1;
 	end else begin
 		if(h_cnt == H+HFP) begin
