@@ -1,12 +1,14 @@
 //============================================================================
-//  Lesson3 port to MiSTer
-//  Copyright (c) 2019 alanswx
+//  Overlay demo for MiSTer
+//  Copyright (c) 2022 alanswx
 //
-//  This is a port from mist of the fourth lesson - 
-//   - it loads a z80 (T80) cpu and runs code from the rom to display on the
-//   screen
+//  This is an example of how to use a character rom, vram, and code to
+//  display an overlay.
+// 
+//  Most of the interesting code is from Jimmy's input tester 
 //
 //============================================================================
+
 
 module emu
 (
@@ -18,7 +20,7 @@ module emu
 	input         RESET,
 
 	//Must be passed to hps_io module
-	inout  [45:0] HPS_BUS,
+	inout  [48:0] HPS_BUS,
 
 	//Base video clock. Usually equals to CLK_SYS.
 	output        CLK_VIDEO,
@@ -44,6 +46,7 @@ module emu
 
 	input  [11:0] HDMI_WIDTH,
 	input  [11:0] HDMI_HEIGHT,
+	output        HDMI_FREEZE,
 
 `ifdef MISTER_FB
 	// Use framebuffer in DDRAM (USE_FB=1 in qsf)
@@ -160,7 +163,6 @@ module emu
 
 	input         OSD_STATUS
 );
-
 ///////// Default values for ports not used in this core /////////
 
 assign ADC_BUS  = 'Z;
@@ -190,11 +192,11 @@ wire [1:0] ar = status[9:8];
 assign VIDEO_ARX = (!ar) ? 12'd4 : (ar - 1'd1);
 assign VIDEO_ARY = (!ar) ? 12'd3 : 12'd0;
 
-assign LED_USER  = copy_in_progress;
+assign LED_USER  = 1'b0;
 
 `include "build_id.v"
 localparam CONF_STR = {
-	"Lesson3;;",
+	"Overlay;;",
 	"-;",
 	"O89,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
@@ -210,26 +212,26 @@ localparam CONF_STR = {
 //
 wire [31:0] status;
 
-hps_io #(.STRLEN(($size(CONF_STR)>>3)) , .PS2DIV(1000), .WIDE(0)) hps_io
+hps_io #(.CONF_STR(CONF_STR)) hps_io
 (
 	.clk_sys(clk_sys),
 	.HPS_BUS(HPS_BUS),
-	.status(status),
+	.status(status)
 
 	
-	.conf_str(CONF_STR)
 	
 );
 ///////////////////
 //  PLL - clocks are the most important part of a system
 ///////////////////////////////////////////////////
-wire clk_sys, locked;
+wire clk_sys, clk_pix, locked;
 
 pll pll
 (
 	.refclk(CLK_50M),
 	.rst(0),
-	.outclk_0(clk_sys), // 25.116279 Mhz - for the vga pixel clock
+	.outclk_0(clk_sys), // 25.116279 Mhz * 2
+	.outclk_1(clk_pix), // 25.116279 Mhz - for the vga pixel clock
 	.locked(locked)
 );
 
@@ -246,7 +248,7 @@ wire hblank, vblank;
 
 soc soc(
    .clk_sys(clk_sys), // wrong
-   .pixel_clock(clk_sys), // wrong
+   .pixel_clock(clk_pix), // wrong
    .VGA_HS(VGA_HS),
    .VGA_VS(VGA_VS),
    .VGA_R(VGA_R),

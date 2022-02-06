@@ -16,9 +16,9 @@ module overlay #(
 	input [9:0] hcnt,
 	input [9:0] vcnt,
 
-	output reg [7:0] o_r,
-	output reg [7:0] o_g,
-	output reg [7:0] o_b,
+	output  [7:0] o_r,
+	output  [7:0] o_g,
+	output  [7:0] o_b,
 
 	input ena,
 
@@ -60,7 +60,7 @@ reg [4:0] cur_block;
 // 7f -- filled bar
 reg wr_ena;
 
-always @(posedge i_pix)
+always @(posedge i_clk)
 begin
 	if (reset)
 	begin
@@ -76,11 +76,11 @@ begin
 	if (pos!=pos_r) 
 	begin
 		//$display("pos: %d pos_r %d blocks %d inc_pos %d increment %d\n",pos,pos_r,blocks,inc_pos,increment);
-		inc_pos<=inc_pos+'d1;
+		inc_pos<=inc_pos+24'd1;
 		if (inc_pos==increment)
 		begin
 			inc_pos<='d0;
-			blocks<=blocks+'d1;
+			blocks<=blocks+5'd1;
 		end
 
 		// do this afterwards, because we need to reset
@@ -126,12 +126,12 @@ begin
 				state<=2'b11;
 
 			wr_ena<=1'b1;
-			wr_addr<='d136+cur_block;
+			wr_addr<=12'd136+cur_block;
 			if (cur_block>blocks)
 				wr_data<='hA6; // empty bar
 			else
 				wr_data<='h7F; // filled bar
-			cur_block<=cur_block+'d1;
+			cur_block<=cur_block+5'd1;
 			//$display("cur_block: %d blocks: %d pos: %d max: %d increment: %d\n",cur_block,blocks,pos,max,increment);
 		end
 		2'b11:
@@ -145,7 +145,7 @@ end
 
 charmap casval
 (
-	.clk(i_clk),
+	.clk(i_pix),
 	.reset(reset),
 	.hcnt(hcnt),
 	.vcnt(vcnt),

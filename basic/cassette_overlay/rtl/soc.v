@@ -26,19 +26,19 @@ wire [9:0] hcount;
 wire [9:0] vcount;
 
 //wire [23:0] tape_end= 'd1024*'d12;
-wire [23:0] tape_end= 'd1023;
+wire [23:0] tape_end= 24'd1023*24'd24;
 reg [23:0] pos='d0;
 
 
 reg [12:0]div;
 always @(posedge pixel_clock)
 begin
-	div<=div+'d1;
+	div<=div+13'd1;
 	if (div=='d6666)
 		div<=0;
 
 	if (div==0)
-          pos<=pos+1;
+          pos<=pos+24'd1;
 
   	if (pos==tape_end)
 		pos<='d0;
@@ -70,7 +70,7 @@ overlay overlay
 vga vga (
 	.pclk     ( pixel_clock),
 	 
-	.cpu_clk  ( cpu_clock        ),
+	.cpu_clk  ( clk_sys        ),
 
         // video output as fed into the VGA outputs
 	.hs    (VGA_HS),
