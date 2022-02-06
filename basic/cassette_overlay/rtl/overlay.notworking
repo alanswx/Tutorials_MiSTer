@@ -1,0 +1,141 @@
+`timescale 1ns / 1ps
+
+
+module overlay #(
+    parameter [7:0] COLS='d1,
+    parameter [7:0] LINES='d1,
+    parameter [23:0] RGB = 24'hFFFFFF
+) (
+	input [7:0] i_r,
+	input [7:0] i_g,
+	input [7:0] i_b,
+
+	input i_clk,
+	input i_pix,
+
+	input [8:0] i_Hcount,
+	input [10:0] i_Vcount,
+
+	output reg [7:0] o_r,
+	output reg [7:0] o_g,
+	output reg [7:0] o_b,
+
+	input ena,
+
+	input [COLS*5-1:0] in0,
+	input [COLS*5-1:0] in1
+);
+
+
+logic [7:0] chars [255:0] = 
+	'{ 
+    8'h3E, 8'h63, 8'h73, 8'h7B, 8'h6F, 8'h67, 8'h3E, 8'h00,  // 0
+    8'h0C, 8'h0E, 8'h0C, 8'h0C, 8'h0C, 8'h0C, 8'h3F, 8'h00,  // 1
+    8'h1E, 8'h33, 8'h30, 8'h1C, 8'h06, 8'h33, 8'h3F, 8'h00,  // 2
+    8'h1E, 8'h33, 8'h30, 8'h1C, 8'h30, 8'h33, 8'h1E, 8'h00,  // 3
+    8'h38, 8'h3C, 8'h36, 8'h33, 8'h7F, 8'h30, 8'h78, 8'h00,  // 4
+    8'h3F, 8'h03, 8'h1F, 8'h30, 8'h30, 8'h33, 8'h1E, 8'h00,  // 5
+    8'h1C, 8'h06, 8'h03, 8'h1F, 8'h33, 8'h33, 8'h1E, 8'h00,  // 6
+    8'h3F, 8'h33, 8'h30, 8'h18, 8'h0C, 8'h0C, 8'h0C, 8'h00,  // 7
+    8'h1E, 8'h33, 8'h33, 8'h1E, 8'h33, 8'h33, 8'h1E, 8'h00,  // 8
+    8'h1E, 8'h33, 8'h33, 8'h3E, 8'h30, 8'h18, 8'h0E, 8'h00,  // 9
+    8'h0C, 8'h1E, 8'h33, 8'h33, 8'h3F, 8'h33, 8'h33, 8'h00,  // A
+    8'h3F, 8'h66, 8'h66, 8'h3E, 8'h66, 8'h66, 8'h3F, 8'h00,  // B
+    8'h3C, 8'h66, 8'h03, 8'h03, 8'h03, 8'h66, 8'h3C, 8'h00,  // C
+    8'h1F, 8'h36, 8'h66, 8'h66, 8'h66, 8'h36, 8'h1F, 8'h00,  // D
+    8'h7F, 8'h46, 8'h16, 8'h1E, 8'h16, 8'h46, 8'h7F, 8'h00,  // E
+    8'h7F, 8'h46, 8'h16, 8'h1E, 8'h16, 8'h06, 8'h0F, 8'h00,  // F
+    8'h00, 8'h00, 8'h00, 8'h00, 8'h00, 8'h00, 8'h00, 8'h00,  //' ' 10
+    8'h00, 8'h00, 8'h3F, 8'h00, 8'h00, 8'h3F, 8'h00, 8'h00,  // =  11
+    8'h00, 8'h0C, 8'h0C, 8'h3F, 8'h0C, 8'h0C, 8'h00, 8'h00,  // +  12
+    8'h00, 8'h00, 8'h00, 8'h3F, 8'h00, 8'h00, 8'h00, 8'h00,  // -  13
+    8'h18, 8'h0C, 8'h06, 8'h03, 8'h06, 8'h0C, 8'h18, 8'h00,  // <  14
+    8'h06, 8'h0C, 8'h18, 8'h30, 8'h18, 8'h0C, 8'h06, 8'h00,  // >  15
+    8'h08, 8'h1C, 8'h36, 8'h63, 8'h41, 8'h00, 8'h00, 8'h00,  // ^  16
+    8'h08, 8'h1C, 8'h36, 8'h63, 8'h41, 8'h00, 8'h00, 8'h00,  // v  17
+    8'h18, 8'h0C, 8'h06, 8'h06, 8'h06, 8'h0C, 8'h18, 8'h00,  // (  18
+    8'h06, 8'h0C, 8'h18, 8'h18, 8'h18, 8'h0C, 8'h06, 8'h00,  // )  19
+    8'h00, 8'h0C, 8'h0C, 8'h00, 8'h00, 8'h0C, 8'h0C, 8'h00,  // :  1A
+    8'h00, 8'h00, 8'h00, 8'h00, 8'h00, 8'h0C, 8'h0C, 8'h00,  // .  1B
+    8'h00, 8'h00, 8'h00, 8'h00, 8'h00, 8'h0C, 8'h0C, 8'h06,  // ,  1C
+    8'h1E, 8'h33, 8'h30, 8'h18, 8'h0C, 8'h00, 8'h0C, 8'h00,  // ?  1D
+    8'h18, 8'h18, 8'h18, 8'h00, 8'h18, 8'h18, 8'h18, 8'h00,  // |  1E
+    8'h36, 8'h36, 8'h7F, 8'h36, 8'h7F, 8'h36, 8'h36, 8'h00   // #  1F
+    };
+
+
+  reg [11:0] vcpt,hcpt,hcpt2;
+  reg [COLS*5-1:0] vin0,vin1;
+  wire [7:0] t_hs,t_vs,t_de;
+  reg [7:0] col;
+  wire de;
+
+  reg [7:0] t_r,t_g,t_b;
+
+
+  reg [COLS*5-1:0] in0s,in1s;
+
+
+always @(posedge i_clk)
+begin
+	in0s<=in0;
+	in1s<=in1;
+end
+
+always @(posedge i_clk)
+begin
+    reg [32*5-1:0]vin_v;
+    reg [4:0]char_v;
+
+        if (i_pix) 
+	begin
+           t_r<=i_r;
+           t_g<=i_g;
+           t_b<=i_b;
+		
+           o_r<=t_r;
+           o_g<=t_g;
+           o_b<=t_b;
+	   if (i_Hcount=='b000000000 & i_Vcount=='b00000000000)  
+	   begin
+             vin0<=in0s;
+             vin1<=in1s;
+           end
+		  if (i_Vcount < 'd16) 
+		      vcpt <= 'd512;
+		  else
+				vcpt <= i_Vcount-'d16;
+        if  ((vcpt/'d8) % 'd2==0 )
+          vin_v<=vin0;
+        else
+          vin_v<=vin1;
+       
+        hcpt2<=hcpt;
+       
+        //////////////////////////////////
+        // Pick characters
+        if (hcpt<(COLS * 'd8) && (vcpt<(LINES * 'd8)))
+	 // need to reverse string so 0-4 is left (not right!)
+          //char_v<=vin_v[(hcpt/'d8)*'d5 : (hcpt/'d8)*'d5+'d4];
+	  char_v<=vin_v[4:0];
+          //char_v<=vin_v[((COLS-'1) - (hcpt/'d8))*'d5 : (((COLS-'1) - (hcpt/'d8))*'d5+'d4)];
+       else 
+          char_v<='b10000; // " " : Blank character
+       
+        col<=chars[(char_v*'d8)+(vcpt % 'd8)];
+       
+        //////////////////////////////////
+        // Insert Overlay
+	if (ena)
+	begin
+          if (col[hcpt2 % 'd8]=='d1) 
+	  begin
+            o_r<=RGB[23 :16];
+            o_g<=RGB[15 :8];
+            o_b<=RGB[ 7 :0];
+          end
+    	end
+        end
+end
+
+endmodule
