@@ -155,12 +155,13 @@ void Vtop::traceChgThis__5(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, u
     // Body
     {
         vcdp->chgIData(oldp+0,(vlTOPp->top__DOT__soc__DOT__pos),24);
+        vcdp->chgIData(oldp+1,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__inc_pos),24);
     }
 }
 
 void Vtop::traceChgThis__6(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+16);
+    vluint32_t* oldp = vcdp->oldp(code+17);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -178,7 +179,7 @@ void Vtop::traceChgThis__6(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, u
 
 void Vtop::traceChgThis__7(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+25);
+    vluint32_t* oldp = vcdp->oldp(code+26);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -188,7 +189,7 @@ void Vtop::traceChgThis__7(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, u
 
 void Vtop::traceChgThis__8(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+26);
+    vluint32_t* oldp = vcdp->oldp(code+27);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -198,7 +199,7 @@ void Vtop::traceChgThis__8(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, u
 
 void Vtop::traceChgThis__9(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+27);
+    vluint32_t* oldp = vcdp->oldp(code+28);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -272,7 +273,7 @@ void Vtop::traceChgThis__9(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, u
 
 void Vtop::traceChgThis__10(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+92);
+    vluint32_t* oldp = vcdp->oldp(code+93);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -282,7 +283,7 @@ void Vtop::traceChgThis__10(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__11(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+93);
+    vluint32_t* oldp = vcdp->oldp(code+94);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -312,7 +313,7 @@ void Vtop::traceChgThis__11(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__12(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+114);
+    vluint32_t* oldp = vcdp->oldp(code+115);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -371,7 +372,7 @@ void Vtop::traceChgThis__12(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__13(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+152);
+    vluint32_t* oldp = vcdp->oldp(code+153);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -384,7 +385,7 @@ void Vtop::traceChgThis__13(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__14(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+154);
+    vluint32_t* oldp = vcdp->oldp(code+155);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -396,7 +397,7 @@ void Vtop::traceChgThis__14(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__15(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+155);
+    vluint32_t* oldp = vcdp->oldp(code+156);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -452,7 +453,7 @@ void Vtop::traceChgThis__15(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__16(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+179);
+    vluint32_t* oldp = vcdp->oldp(code+180);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -485,7 +486,7 @@ void Vtop::traceChgThis__16(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__17(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+201);
+    vluint32_t* oldp = vcdp->oldp(code+202);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -497,7 +498,7 @@ void Vtop::traceChgThis__17(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__18(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+204);
+    vluint32_t* oldp = vcdp->oldp(code+205);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {
@@ -516,7 +517,7 @@ void Vtop::traceChgThis__18(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
 
 void Vtop::traceChgThis__19(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, uint32_t code) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
-    vluint32_t* oldp = vcdp->oldp(code+214);
+    vluint32_t* oldp = vcdp->oldp(code+215);
     if (false && vcdp && oldp) {}  // Prevent unused
     // Body
     {

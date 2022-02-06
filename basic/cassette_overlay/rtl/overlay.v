@@ -51,7 +51,7 @@ reg [1:0] state;
 // this is an increment / 16 -- we have 10 now, so 
 // we need to make the bar 6 wider - AJS TODO
 wire [23:0] increment={4'b0000,max[23:4]};
-
+reg [23:0] inc_pos='d0;
 reg [4:0] blocks;
 reg [4:0] cur_block;
 
@@ -73,60 +73,73 @@ begin
 	// increment the tape gears
 	wr_ena<=1'b0;
 	pos_r<=pos;
+	if (pos!=pos_r) 
 	begin
-		case (state)
-			2'b00: 
-			begin
-				if (pos!=pos_r) 
-				begin
-					if (pos=='d0)
-						blocks<='d0;
-					cur_block<='d0;
-					if (pos==increment)
-					begin
-						blocks<=blocks+'d1;
-					end
-					wr_ena<=1'b1;
-					wr_addr<='d331;
-					if (wheel_state)
-						wr_data<='h2A;
-					else
-						wr_data<='h96;
-					state<=2'b01;
-				end
-			end
-			2'b01: 
-			begin
-				wr_ena<=1'b1;
-				wr_addr<='d340;
-				if (wheel_state)
-					wr_data<='h96;
-				else
-					wr_data<='h2A;
-				wheel_state<=~wheel_state;
-				state<=2'b10;
-			end
-			2'b10: 
-			begin
-				if (cur_block=='d15)
-					state<=2'b11;
+		//$display("pos: %d pos_r %d blocks %d inc_pos %d increment %d\n",pos,pos_r,blocks,inc_pos,increment);
+		inc_pos<=inc_pos+'d1;
+		if (inc_pos==increment)
+		begin
+			inc_pos<='d0;
+			blocks<=blocks+'d1;
+		end
 
-				wr_ena<=1'b1;
-				wr_addr<='d136+cur_block;
-				if (cur_block>=blocks)
-					wr_data<='hA6;
-				else
-					wr_data<='h7F;
-				cur_block<=cur_block+'d1;
-				//$display("cur_block: %d\n",cur_block);
-			end
-			2'b11:
-			begin
-				state<=2'b00;
-			end
-		endcase
-		
+		// do this afterwards, because we need to reset
+		// blocks
+		if (pos=='d0)
+		begin
+			//$display("pos is 0\n");
+			inc_pos<='d0;
+			blocks<='d0;
+		end
+		cur_block<='d0;
 	end
+	case (state)
+		2'b00: 
+		begin
+			if (pos!=pos_r) 
+			begin
+				//$display("pos: %d \n",pos);
+				wr_ena<=1'b1;
+				wr_addr<='d331;
+				if (wheel_state)
+					wr_data<='h2A;
+				else
+					wr_data<='h96;
+				state<=2'b01;
+			end
+		end
+		2'b01: 
+		begin
+			wr_ena<=1'b1;
+			wr_addr<='d340;
+			if (wheel_state)
+				wr_data<='h96;
+			else
+				wr_data<='h2A;
+			wheel_state<=~wheel_state;
+			state<=2'b10;
+		end
+		2'b10: 
+		begin
+			// draw the progress bar - 16 segments
+			if (cur_block=='d15)
+				state<=2'b11;
+
+			wr_ena<=1'b1;
+			wr_addr<='d136+cur_block;
+			if (cur_block>blocks)
+				wr_data<='hA6; // empty bar
+			else
+				wr_data<='h7F; // filled bar
+			cur_block<=cur_block+'d1;
+			$display("cur_block: %d blocks: %d pos: %d max: %d increment: %d\n",cur_block,blocks,pos,max,increment);
+		end
+		2'b11:
+		begin
+			state<=2'b00;
+		end
+	endcase
+		
 
 end
 

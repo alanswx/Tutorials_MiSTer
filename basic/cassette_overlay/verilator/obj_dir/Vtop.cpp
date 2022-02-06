@@ -106,6 +106,7 @@ void Vtop::_initial__TOP__1(Vtop__Syms* __restrict vlSymsp) {
                  , vlTOPp->top__DOT__soc__DOT__overlay__DOT__chrom__DOT__mem
                  , 0, ~VL_ULL(0));
     vlTOPp->top__DOT__soc__DOT__cpu_reset_cnt = 0U;
+    vlTOPp->top__DOT__soc__DOT__overlay__DOT__inc_pos = 0U;
     VL_WRITEF("Loading rom.\n1995392041781297062227393221518712\n");
     __Vtemp1[0U] = 0x2e686578U;
     __Vtemp1[1U] = 0x6f756e64U;
@@ -18378,21 +18379,27 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
     // Variables
     CData/*1:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__state;
     CData/*4:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks;
+    CData/*4:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__cur_block;
     CData/*0:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__wheel_state;
     SData/*12:0*/ __Vdly__top__DOT__soc__DOT__div;
     SData/*9:0*/ __Vdly__top__DOT__soc__DOT__vga__DOT__h_cnt;
     SData/*9:0*/ __Vdly__top__DOT__soc__DOT__vga__DOT__v_cnt;
     SData/*13:0*/ __Vdly__top__DOT__soc__DOT__vga__DOT__video_counter;
     IData/*23:0*/ __Vdly__top__DOT__soc__DOT__pos;
+    IData/*23:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__inc_pos;
     // Body
     __Vdly__top__DOT__soc__DOT__div = vlTOPp->top__DOT__soc__DOT__div;
     __Vdly__top__DOT__soc__DOT__pos = vlTOPp->top__DOT__soc__DOT__pos;
     __Vdly__top__DOT__soc__DOT__overlay__DOT__wheel_state 
         = vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state;
+    __Vdly__top__DOT__soc__DOT__overlay__DOT__cur_block 
+        = vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block;
     __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks 
         = vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks;
     __Vdly__top__DOT__soc__DOT__overlay__DOT__state 
         = vlTOPp->top__DOT__soc__DOT__overlay__DOT__state;
+    __Vdly__top__DOT__soc__DOT__overlay__DOT__inc_pos 
+        = vlTOPp->top__DOT__soc__DOT__overlay__DOT__inc_pos;
     __Vdly__top__DOT__soc__DOT__vga__DOT__video_counter 
         = vlTOPp->top__DOT__soc__DOT__vga__DOT__video_counter;
     __Vdly__top__DOT__soc__DOT__vga__DOT__h_cnt = vlTOPp->top__DOT__soc__DOT__vga__DOT__h_cnt;
@@ -18407,7 +18414,7 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
                                            & ((IData)(1U) 
                                               + vlTOPp->top__DOT__soc__DOT__pos));
     }
-    if ((0x400U == vlTOPp->top__DOT__soc__DOT__pos)) {
+    if ((0x3ffU == vlTOPp->top__DOT__soc__DOT__pos)) {
         __Vdly__top__DOT__soc__DOT__pos = 0U;
     }
     if (vlTOPp->top__DOT__soc__DOT__overlay__DOT__reset) {
@@ -18415,8 +18422,22 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
         __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks = 0U;
     }
     vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena = 0U;
+    if ((vlTOPp->top__DOT__soc__DOT__pos != vlTOPp->top__DOT__soc__DOT__overlay__DOT__pos_r)) {
+        __Vdly__top__DOT__soc__DOT__overlay__DOT__inc_pos 
+            = (0xffffffU & ((IData)(1U) + vlTOPp->top__DOT__soc__DOT__overlay__DOT__inc_pos));
+        __Vdly__top__DOT__soc__DOT__overlay__DOT__cur_block = 0U;
+        if ((0x3fU == vlTOPp->top__DOT__soc__DOT__overlay__DOT__inc_pos)) {
+            __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks 
+                = (0x1fU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks)));
+            __Vdly__top__DOT__soc__DOT__overlay__DOT__inc_pos = 0U;
+        }
+        if ((0U == vlTOPp->top__DOT__soc__DOT__pos)) {
+            __Vdly__top__DOT__soc__DOT__overlay__DOT__inc_pos = 0U;
+            __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks = 0U;
+        }
+    }
     if ((2U & (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state))) {
-        if ((1U & (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state))) {
+        if (VL_LIKELY((1U & (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state)))) {
             __Vdly__top__DOT__soc__DOT__overlay__DOT__state = 0U;
         } else {
             if ((0xfU == (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block))) {
@@ -18427,10 +18448,14 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
                 = (0xfffU & ((IData)(0x88U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block)));
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data 
                 = (((IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block) 
-                    >= (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks))
+                    > (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks))
                     ? 0xa6U : 0x7fU);
-            vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block 
+            __Vdly__top__DOT__soc__DOT__overlay__DOT__cur_block 
                 = (0x1fU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block)));
+            VL_WRITEF("cur_block: %2# blocks: %2# pos: %8# max:     1023 increment:       63\n\n",
+                      5,vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block,
+                      5,(IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks),
+                      24,vlTOPp->top__DOT__soc__DOT__pos);
         }
     } else {
         if ((1U & (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state))) {
@@ -18444,14 +18469,6 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
                 = (1U & (~ (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state)));
         } else {
             if ((vlTOPp->top__DOT__soc__DOT__pos != vlTOPp->top__DOT__soc__DOT__overlay__DOT__pos_r)) {
-                if ((0U == vlTOPp->top__DOT__soc__DOT__pos)) {
-                    __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks = 0U;
-                }
-                vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block = 0U;
-                if ((0x40U == vlTOPp->top__DOT__soc__DOT__pos)) {
-                    __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks 
-                        = (0x1fU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks)));
-                }
                 vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena = 1U;
                 vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_addr = 0x14bU;
                 vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data 
@@ -18527,8 +18544,12 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
         = __Vdly__top__DOT__soc__DOT__overlay__DOT__state;
     vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks 
         = __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks;
+    vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block 
+        = __Vdly__top__DOT__soc__DOT__overlay__DOT__cur_block;
     vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state 
         = __Vdly__top__DOT__soc__DOT__overlay__DOT__wheel_state;
+    vlTOPp->top__DOT__soc__DOT__overlay__DOT__inc_pos 
+        = __Vdly__top__DOT__soc__DOT__overlay__DOT__inc_pos;
     vlTOPp->top__DOT__soc__DOT__vga__DOT__video_counter 
         = __Vdly__top__DOT__soc__DOT__vga__DOT__video_counter;
     vlTOPp->top__DOT__soc__DOT__vga__DOT__h_cnt = __Vdly__top__DOT__soc__DOT__vga__DOT__h_cnt;
@@ -36635,6 +36656,7 @@ void Vtop::_ctor_var_reset() {
     top__DOT__soc__DOT__overlay__DOT__wr_data = 0;
     top__DOT__soc__DOT__overlay__DOT__wheel_state = 0;
     top__DOT__soc__DOT__overlay__DOT__state = 0;
+    top__DOT__soc__DOT__overlay__DOT__inc_pos = 0;
     top__DOT__soc__DOT__overlay__DOT__blocks = 0;
     top__DOT__soc__DOT__overlay__DOT__cur_block = 0;
     top__DOT__soc__DOT__overlay__DOT__wr_ena = 0;

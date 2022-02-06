@@ -26,7 +26,7 @@ wire [9:0] hcount;
 wire [9:0] vcount;
 
 //wire [23:0] tape_end= 'd1024*'d12;
-wire [23:0] tape_end= 'd1024;
+wire [23:0] tape_end= 'd1023;
 reg [23:0] pos='d0;
 
 

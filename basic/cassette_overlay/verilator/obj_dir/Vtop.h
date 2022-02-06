@@ -246,6 +246,7 @@ VL_MODULE(Vtop) {
     struct {
         IData/*23:0*/ top__DOT__soc__DOT__pos;
         IData/*23:0*/ top__DOT__soc__DOT__overlay__DOT__pos_r;
+        IData/*23:0*/ top__DOT__soc__DOT__overlay__DOT__inc_pos;
         CData/*7:0*/ top__DOT__soc__DOT__overlay__DOT__chrom__DOT__mem[2048];
         CData/*7:0*/ top__DOT__soc__DOT__overlay__DOT__chram__DOT__mem[2048];
         CData/*7:0*/ top__DOT__soc__DOT__vga__DOT__vmem[16000];
