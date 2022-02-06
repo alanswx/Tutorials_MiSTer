@@ -430,8 +430,8 @@ void Vtop::traceChgThis__15(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
         vcdp->chgCData(oldp+10,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data),8);
         vcdp->chgBit(oldp+11,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state));
         vcdp->chgCData(oldp+12,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state),2);
-        vcdp->chgCData(oldp+13,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks),4);
-        vcdp->chgCData(oldp+14,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block),4);
+        vcdp->chgCData(oldp+13,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks),5);
+        vcdp->chgCData(oldp+14,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block),5);
         vcdp->chgBit(oldp+15,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena));
         vcdp->chgCData(oldp+16,((7U & ((IData)(7U) 
                                        - (IData)(vlTOPp->top__DOT__soc__DOT__vga__DOT__h_cnt)))),3);

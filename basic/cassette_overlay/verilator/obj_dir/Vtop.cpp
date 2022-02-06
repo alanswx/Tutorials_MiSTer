@@ -18377,7 +18377,7 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
     Vtop* __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
     // Variables
     CData/*1:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__state;
-    CData/*3:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks;
+    CData/*4:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks;
     CData/*0:0*/ __Vdly__top__DOT__soc__DOT__overlay__DOT__wheel_state;
     SData/*12:0*/ __Vdly__top__DOT__soc__DOT__div;
     SData/*9:0*/ __Vdly__top__DOT__soc__DOT__vga__DOT__h_cnt;
@@ -18419,23 +18419,23 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
         if ((1U & (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state))) {
             __Vdly__top__DOT__soc__DOT__overlay__DOT__state = 0U;
         } else {
-            if ((9U == (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block))) {
+            if ((0xfU == (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block))) {
                 __Vdly__top__DOT__soc__DOT__overlay__DOT__state = 3U;
             }
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena = 1U;
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_addr 
-                = (0xfffU & ((IData)(0x93U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block)));
+                = (0xfffU & ((IData)(0x88U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block)));
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data 
                 = (((IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block) 
                     >= (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks))
                     ? 0xa6U : 0x7fU);
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block 
-                = (0xfU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block)));
+                = (0x1fU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block)));
         }
     } else {
         if ((1U & (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state))) {
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena = 1U;
-            vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_addr = 0x15cU;
+            vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_addr = 0x154U;
             vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data 
                 = ((IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state)
                     ? 0x96U : 0x2aU);
@@ -18444,13 +18444,16 @@ VL_INLINE_OPT void Vtop::_sequent__TOP__6(Vtop__Syms* __restrict vlSymsp) {
                 = (1U & (~ (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state)));
         } else {
             if ((vlTOPp->top__DOT__soc__DOT__pos != vlTOPp->top__DOT__soc__DOT__overlay__DOT__pos_r)) {
-                if ((0x40U == vlTOPp->top__DOT__soc__DOT__pos)) {
-                    __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks 
-                        = (0xfU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks)));
+                if ((0U == vlTOPp->top__DOT__soc__DOT__pos)) {
+                    __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks = 0U;
                 }
                 vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block = 0U;
+                if ((0x40U == vlTOPp->top__DOT__soc__DOT__pos)) {
+                    __Vdly__top__DOT__soc__DOT__overlay__DOT__blocks 
+                        = (0x1fU & ((IData)(1U) + (IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks)));
+                }
                 vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena = 1U;
-                vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_addr = 0x153U;
+                vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_addr = 0x14bU;
                 vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data 
                     = ((IData)(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state)
                         ? 0x2aU : 0x96U);

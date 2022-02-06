@@ -75,8 +75,8 @@ VL_MODULE(Vtop) {
         CData/*7:0*/ top__DOT__soc__DOT__overlay__DOT__wr_data;
         CData/*0:0*/ top__DOT__soc__DOT__overlay__DOT__wheel_state;
         CData/*1:0*/ top__DOT__soc__DOT__overlay__DOT__state;
-        CData/*3:0*/ top__DOT__soc__DOT__overlay__DOT__blocks;
-        CData/*3:0*/ top__DOT__soc__DOT__overlay__DOT__cur_block;
+        CData/*4:0*/ top__DOT__soc__DOT__overlay__DOT__blocks;
+        CData/*4:0*/ top__DOT__soc__DOT__overlay__DOT__cur_block;
         CData/*0:0*/ top__DOT__soc__DOT__overlay__DOT__wr_ena;
         CData/*7:0*/ top__DOT__soc__DOT__overlay__DOT__chrom__DOT__data_a;
         CData/*0:0*/ top__DOT__soc__DOT__overlay__DOT__chrom__DOT__wren_b;

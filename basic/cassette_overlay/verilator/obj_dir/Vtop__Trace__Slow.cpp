@@ -155,8 +155,8 @@ void Vtop::traceInitThis__1(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
         vcdp->declBit(c+166,"top soc overlay wheel_state", false,-1);
         vcdp->declBus(c+167,"top soc overlay state", false,-1, 1,0);
         vcdp->declBus(c+249,"top soc overlay increment", false,-1, 23,0);
-        vcdp->declBus(c+168,"top soc overlay blocks", false,-1, 3,0);
-        vcdp->declBus(c+169,"top soc overlay cur_block", false,-1, 3,0);
+        vcdp->declBus(c+168,"top soc overlay blocks", false,-1, 4,0);
+        vcdp->declBus(c+169,"top soc overlay cur_block", false,-1, 4,0);
         vcdp->declBit(c+170,"top soc overlay wr_ena", false,-1);
         vcdp->declBit(c+230,"top soc overlay casval clk", false,-1);
         vcdp->declBit(c+244,"top soc overlay casval reset", false,-1);
@@ -785,8 +785,8 @@ void Vtop::traceFullThis__1(Vtop__Syms* __restrict vlSymsp, VerilatedVcd* vcdp, 
         vcdp->fullCData(oldp+164,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_data),8);
         vcdp->fullBit(oldp+165,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wheel_state));
         vcdp->fullCData(oldp+166,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__state),2);
-        vcdp->fullCData(oldp+167,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks),4);
-        vcdp->fullCData(oldp+168,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block),4);
+        vcdp->fullCData(oldp+167,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__blocks),5);
+        vcdp->fullCData(oldp+168,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__cur_block),5);
         vcdp->fullBit(oldp+169,(vlTOPp->top__DOT__soc__DOT__overlay__DOT__wr_ena));
         vcdp->fullCData(oldp+170,((7U & ((IData)(7U) 
                                          - (IData)(vlTOPp->top__DOT__soc__DOT__vga__DOT__h_cnt)))),3);

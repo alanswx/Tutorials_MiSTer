@@ -52,8 +52,8 @@ reg [1:0] state;
 // we need to make the bar 6 wider - AJS TODO
 wire [23:0] increment={4'b0000,max[23:4]};
 
-reg [3:0] blocks;
-reg [3:0] cur_block;
+reg [4:0] blocks;
+reg [4:0] cur_block;
 
 
 // a6 -- unfilled
@@ -79,24 +79,26 @@ begin
 			begin
 				if (pos!=pos_r) 
 				begin
+					if (pos=='d0)
+						blocks<='d0;
 					cur_block<='d0;
 					if (pos==increment)
 					begin
 						blocks<=blocks+'d1;
 					end
 					wr_ena<=1'b1;
-					wr_addr<='d339;
+					wr_addr<='d331;
 					if (wheel_state)
 						wr_data<='h2A;
 					else
 						wr_data<='h96;
 					state<=2'b01;
-			end
+				end
 			end
 			2'b01: 
 			begin
 				wr_ena<=1'b1;
-				wr_addr<='d348;
+				wr_addr<='d340;
 				if (wheel_state)
 					wr_data<='h96;
 				else
@@ -106,11 +108,11 @@ begin
 			end
 			2'b10: 
 			begin
-				if (cur_block=='d9)
+				if (cur_block=='d15)
 					state<=2'b11;
 
 				wr_ena<=1'b1;
-				wr_addr<='d147+cur_block;
+				wr_addr<='d136+cur_block;
 				if (cur_block>=blocks)
 					wr_data<='hA6;
 				else
