@@ -34,6 +34,7 @@ module top(VGA_R,VGA_B,VGA_G,VGA_HS,VGA_VS,VGA_HB,VGA_VB,reset,clk_sys,clk_vid,i
 
 wire VGA_DE;
 soc soc(
+   .reset(reset),
    .clk_sys(clk_sys), // wrong
    .pixel_clock(clk_vid), // wrong
    .VGA_HS(VGA_HS),

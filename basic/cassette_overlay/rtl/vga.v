@@ -13,7 +13,6 @@ module vga (
 	
 	// CPU interface (write only!)
 	input  cpu_clk,
-	input  cpu_wr,
 		
    // VGA output
    output reg	hs,

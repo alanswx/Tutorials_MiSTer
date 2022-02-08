@@ -9,7 +9,8 @@ module soc (
    output [7:0] VGA_B,
    output VGA_HB,
    output VGA_VB,
-   output VGA_DE
+   output VGA_DE,
+   input  reset
 );        
 
 ///////////////////////////////////////////////////
@@ -47,6 +48,7 @@ end
 
 overlay overlay
 (
+    .reset(reset),
     .i_r(r),
     .i_g(g),
     .i_b(b),

@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-
 module overlay #(
     parameter [23:0] RGB = 24'hFFFFFF
 ) (
@@ -22,15 +21,16 @@ module overlay #(
 
 	input ena,
 
-	input [23:0] max,
-	input [23:0] pos
+	input [24:0] max,
+	input [24:0] pos
 
 );
 
 
-wire [7:0]	charmap_r;
-wire [7:0]	charmap_g;
-wire [7:0]	charmap_b;
+wire [9:0] new_h = hcnt - 'd150;
+wire [9:0] new_v = vcnt - 'd100;
+
+
 wire		charmap_a;
 // Casval - character map
 wire [11:0] chram_addr;
@@ -38,20 +38,29 @@ wire [11:0] chrom_addr;
 wire [7:0] chrom_data_out;
 wire [7:0] chmap_data_out;
 
-assign o_r= (charmap_a & ena) ? RGB[23:16] : i_r;
-assign o_g= (charmap_a & ena) ? RGB[15:8] : i_g;
-assign o_b= (charmap_a & ena) ? RGB[7:0]: i_b;
+// 22 wide
+// 11 high
 
-reg [23:0] pos_r;
+wire in_box = new_h > 'd8*'d5 && new_h < 'd8*('d24+'d3) && new_v > 'd8*1 && new_v < 'd8*'d12; 
+
+//
+// Mix the colors, we use the RGB constant, but we darken the background by shifting it right
+//
+assign o_r= ~ena | ~in_box ? i_r : (charmap_a ) ? RGB[23:16] : i_r >> 2;
+assign o_g= ~ena | ~in_box ? i_g : (charmap_a ) ? RGB[15:8]  : i_g >> 2;
+assign o_b= ~ena | ~in_box ? i_b : (charmap_a ) ? RGB[7:0]   : i_b >> 2;
+
+reg [24:0] pos_r;
 reg [11:0] wr_addr;
 reg [7:0] wr_data;
 reg wheel_state;
 reg [1:0] state;
 
-// this is an increment / 16 -- we have 10 now, so 
-// we need to make the bar 6 wider - AJS TODO
-wire [23:0] increment={4'b0000,max[23:4]};
-reg [23:0] inc_pos='d0;
+// this is an increment / 16  
+// our inc_pos will count up to the increment each time
+// this way we don't need a division
+wire [24:0] increment={4'b0000,max[23:4]};
+reg [24:0] inc_pos='d0;
 reg [4:0] blocks;
 reg [4:0] cur_block;
 
@@ -73,10 +82,16 @@ begin
 	// increment the tape gears
 	wr_ena<=1'b0;
 	pos_r<=pos;
+	
+	//
+	// Each time we get a new position, we increment our inc_pos counter
+	// if we reach the "increment size" - increment_size is one character in the progress bar
+	// then we need to increase "blocks"
+	//
 	if (pos!=pos_r) 
 	begin
 		//$display("pos: %d pos_r %d blocks %d inc_pos %d increment %d\n",pos,pos_r,blocks,inc_pos,increment);
-		inc_pos<=inc_pos+24'd1;
+		inc_pos<=inc_pos+25'd1;
 		if (inc_pos==increment)
 		begin
 			inc_pos<='d0;
@@ -85,6 +100,7 @@ begin
 
 		// do this afterwards, because we need to reset
 		// blocks
+		// if the tape is rewound, we need to reset our variables
 		if (pos=='d0)
 		begin
 			//$display("pos is 0\n");
@@ -99,6 +115,8 @@ begin
 			if (pos!=pos_r) 
 			begin
 				//$display("pos: %d \n",pos);
+				// swap characters on the left tape gear and increment to the next
+				// state so we can swap characters on that gear
 				wr_ena<=1'b1;
 				wr_addr<='d331;
 				if (wheel_state)
@@ -108,6 +126,7 @@ begin
 				state<=2'b01;
 			end
 		end
+		// swap characters on the right tape gear and increment to the next state
 		2'b01: 
 		begin
 			wr_ena<=1'b1;
@@ -119,6 +138,10 @@ begin
 			wheel_state<=~wheel_state;
 			state<=2'b10;
 		end
+		// stay in this state for 16 cycles so we can draw each segment of the progress bar
+		// we check the block we are setting in vram vs the "blocks" so we know whether to
+		// draw it filled or empty
+
 		2'b10: 
 		begin
 			// draw the progress bar - 16 segments
@@ -143,12 +166,16 @@ begin
 
 end
 
+//
+// The charmap code takes the VRAM, CHAR ROM, and current hcnt/vcnt and outputs 
+// The correct alpha - 1 for draw a char, 0 for background
+//
 charmap casval
 (
 	.clk(i_pix),
 	.reset(reset),
-	.hcnt(hcnt),
-	.vcnt(vcnt),
+	.hcnt(new_h),
+	.vcnt(new_v),
 	.chrom_data_out(chrom_data_out),
 	.chmap_data_out(chmap_data_out),
 	.chram_addr(chram_addr),
@@ -157,7 +184,7 @@ charmap casval
 );
 
 // Char ROM - 0x9000 - 0x97FF (0x0800 / 2048 bytes)
-dpram #(.widthad_a(11),.width_a(8), .init_file("font.hex")) chrom
+cas_dpram #(.widthad_a(11),.width_a(8), .init_file("font.hex")) chrom
 (
 	.clock_a(i_clk),
 	.address_a(chrom_addr[10:0]),
@@ -173,7 +200,7 @@ dpram #(.widthad_a(11),.width_a(8), .init_file("font.hex")) chrom
 );
 
 // Char index RAM - 0x9800 - 0x9FFF (0x0800 / 2048 bytes)
-dpram #(.widthad_a(11),.width_a(8), .init_file("background.hex")) chram
+cas_dpram #(.widthad_a(11),.width_a(8), .init_file("background.hex")) chram
 (
 	.clock_a(i_clk),
 	.address_a(wr_addr[10:0]),

@@ -58,6 +58,7 @@ V_SRC = \
         $(RTL)/charmap.v \
         $(RTL)/soc.v \
         $(RTL)/bram.sv  \
+        $(RTL)/cas_bram.sv  \
         $(RTL)/vga.v 
 
 C_SRC = \
