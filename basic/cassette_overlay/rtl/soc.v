@@ -10,7 +10,14 @@ module soc (
    output VGA_HB,
    output VGA_VB,
    output VGA_DE,
-   input  reset
+   input  reset,
+
+   input        ioctl_download,
+   input        ioctl_wr,
+   input [24:0] ioctl_addr,
+   input [7:0] ioctl_dout,
+   input [7:0]  ioctl_index
+   
 );        
 
 ///////////////////////////////////////////////////
@@ -46,6 +53,24 @@ begin
 	
 end
 
+// Char index RAM - 0x9800 - 0x9FFF (0x0800 / 2048 bytes)
+cas_dpram #(.widthad_a(15),.width_a(8)) tape_ram
+(
+        .clock_a(clk_sys),
+        .address_a(ioctl_addr[14:0]),
+        .wren_a(ioctl_wr & ioctl_download),
+        .data_a(ioctl_dout),
+        .q_a(),
+
+        .clock_b(clk_sys),
+        .address_b(pos),
+        .wren_b(1'b0),
+        .data_b(),
+        .q_b(tape_data)
+);
+
+wire [7:0] tape_data;
+
 overlay overlay
 (
     .reset(reset),
@@ -64,7 +89,8 @@ overlay overlay
     .ena(1'b1),
 
     .max(tape_end),
-    .pos(pos)
+    .pos(pos),
+    .tape_data(tape_data)
 );
 
 

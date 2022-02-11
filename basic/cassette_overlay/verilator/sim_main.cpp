@@ -177,6 +177,7 @@ int main(int argc, char** argv, char** env) {
 	if (video.Initialise(windowTitle) == 1) { return 1; }
 
 	//bus.QueueDownload("bird.bin", 0);
+	bus.QueueDownload("zaxxon.cas", 1);
 
 
 #ifdef WIN32

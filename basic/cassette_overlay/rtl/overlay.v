@@ -22,7 +22,8 @@ module overlay #(
 	input ena,
 
 	input [24:0] max,
-	input [24:0] pos
+	input [24:0] pos,
+	input [7:0] tape_data 
 
 );
 
@@ -43,11 +44,16 @@ wire [7:0] chmap_data_out;
 
 wire in_box = new_h > 'd8*'d5 && new_h < 'd8*('d24+'d3) && new_v > 'd8*1 && new_v < 'd8*'d12; 
 
+// height - 96-8 -> 84
 //
 // Mix the colors, we use the RGB constant, but we darken the background by shifting it right
 //
-assign o_r= ~ena | ~in_box ? i_r : (charmap_a ) ? RGB[23:16] : i_r >> 2;
-assign o_g= ~ena | ~in_box ? i_g : (charmap_a ) ? RGB[15:8]  : i_g >> 2;
+assign o_r = o_r_a | meter_red;
+reg [7:0] o_r_a;
+assign o_g = o_g_a | meter_green;
+reg [7:0] o_g_a;
+assign o_r_a= ~ena | ~in_box ? i_r : (charmap_a ) ? RGB[23:16] : i_r >> 2;
+assign o_g_a= ~ena | ~in_box ? i_g : (charmap_a ) ? RGB[15:8]  : i_g >> 2;
 assign o_b= ~ena | ~in_box ? i_b : (charmap_a ) ? RGB[7:0]   : i_b >> 2;
 
 reg [24:0] pos_r;
@@ -90,6 +96,7 @@ begin
 	//
 	if (pos!=pos_r) 
 	begin
+		$display("pos: %d tape_data %x",pos,tape_data);
 		//$display("pos: %d pos_r %d blocks %d inc_pos %d increment %d\n",pos,pos_r,blocks,inc_pos,increment);
 		inc_pos<=inc_pos+25'd1;
 		if (inc_pos==increment)
@@ -162,8 +169,27 @@ begin
 			state<=2'b00;
 		end
 	endcase
-		
+end
 
+//
+//  some code to draw a waveform
+//
+reg [255:0] seq;
+wire [7:0] meter_red;
+wire [7:0] meter_green;
+//assign color = ena & vcnt > 480-db[7:1] ? 8'h80 : 0;
+//255,127, - 84
+assign meter_green = ena & in_box & new_v > 'd88 - db[7:2]  & new_v > 'd40  ? 8'h80: 8'h00;
+assign meter_red   = ena & in_box & new_v > 'd88 - db[7:2]  & new_v < 'd60  ? 8'h80: 8'h00;
+//assign meter_red  = 8'h00;//ena & in_box & new_v > db[7:1]  - 'd40& new_v < db[7:1]  - 'd20  ? 8'h80: 0;
+//wire [6:0] idx = hcnt[10:4] - 7'd11;
+wire [6:0] idx = new_h[10:4] ;
+wire [7:0] db = seq >> { idx, 2'b0 };
+
+always @(posedge i_pix)
+begin
+	if (vcnt==0)
+  		seq <= { seq[247:0], tape_data};
 end
 
 //
