@@ -29,6 +29,7 @@ module vga (
 );
 					
 // 640x400 70HZ VESA according to  http://tinyvga.com/vga-timing/640x400@70Hz
+
 parameter H   = 640;    // width of visible area
 parameter HFP = 16;     // unused time before hsync
 parameter HS  = 96;     // width of hsync
@@ -38,6 +39,19 @@ parameter V   = 400;    // height of visible area
 parameter VFP = 12;     // unused time before vsync
 parameter VS  = 2;      // width of vsync
 parameter VBP = 35;     // unused time after vsync
+
+// 15khz
+/*
+parameter H   = 320;    // width of visible area
+parameter HFP = 11;     // unused time before hsync
+parameter HS  = 37;     // width of hsync
+parameter HBP = 67;     // unused time after hsync
+
+parameter V   = 200;    // height of visible area
+parameter VFP = 2;     // unused time before vsync
+parameter VS  = 2;      // width of vsync
+parameter VBP = 12;     // unused time after vsync
+*/
 
 reg[9:0]  h_cnt;        // horizontal pixel counter
 reg[9:0]  v_cnt;        // vertical pixel counter
@@ -103,8 +117,8 @@ always@(posedge pclk) begin
 		if(h_cnt[1:0] == 2'b11)
 			video_counter <= video_counter + 14'd1;
 		
-		//pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:8'hff;    // checkboard
-		 pixel <= video_counter[7:0];                // color pattern
+		pixel <= (v_cnt[2] ^ h_cnt[2])?8'h00:8'hff;    // checkboard
+		// pixel <= video_counter[7:0];                // color pattern
 		//pixel <= vmem[video_counter];               // read VRAM
 		de<=1;
 	end else begin

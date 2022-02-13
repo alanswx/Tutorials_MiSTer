@@ -49,12 +49,14 @@ wire in_box = new_h > 'd8*'d5 && new_h < 'd8*('d24+'d3) && new_v > 'd8*1 && new_
 // Mix the colors, we use the RGB constant, but we darken the background by shifting it right
 //
 assign o_r = o_r_a | meter_red;
-reg [7:0] o_r_a;
+wire [7:0] o_r_a;
 assign o_g = o_g_a | meter_green;
-reg [7:0] o_g_a;
+wire [7:0] o_g_a;
+assign o_b = o_b_a | meter_blue;
+wire [7:0] o_b_a;
 assign o_r_a= ~ena | ~in_box ? i_r : (charmap_a ) ? RGB[23:16] : i_r >> 2;
 assign o_g_a= ~ena | ~in_box ? i_g : (charmap_a ) ? RGB[15:8]  : i_g >> 2;
-assign o_b= ~ena | ~in_box ? i_b : (charmap_a ) ? RGB[7:0]   : i_b >> 2;
+assign o_b_a= ~ena | ~in_box ? i_b : (charmap_a ) ? RGB[7:0]   : i_b >> 2;
 
 reg [24:0] pos_r;
 reg [11:0] wr_addr;
@@ -177,13 +179,21 @@ end
 reg [255:0] seq;
 wire [7:0] meter_red;
 wire [7:0] meter_green;
+wire [7:0] meter_blue;
 //assign color = ena & vcnt > 480-db[7:1] ? 8'h80 : 0;
 //255,127, - 84
-assign meter_green = ena & in_box & new_v > 'd88 - db[7:2]  & new_v > 'd40  ? 8'h80: 8'h00;
-assign meter_red   = ena & in_box & new_v > 'd88 - db[7:2]  & new_v < 'd60  ? 8'h80: 8'h00;
-//assign meter_red  = 8'h00;//ena & in_box & new_v > db[7:1]  - 'd40& new_v < db[7:1]  - 'd20  ? 8'h80: 0;
+//assign meter_green = ena & in_box & new_v == db[7:2] & new_v > 'd88 - db[7:2]  & new_v > 'd40  ? 8'h80: 8'h00;
+//assign meter_red   = ena & in_box & new_v == db[7:2] & new_v > 'd88 - db[7:2]  & new_v < 'd60  ? 8'h80: 8'h00;
+//assign meter_green = ena & in_box &  new_v > 'd88 - db[7:2]  & new_v > 'd40  ? 8'h80: 8'h00;
+//assign meter_red   = ena & in_box &  new_v > 'd88 - db[7:2]  & new_v < 'd60  ? 8'h80: 8'h00;
+
+//assign meter_red   = ena & in_box & new_h > 'd0 & new_h < 'd20 &  new_v > 'd88 - tape_data[7:2]   ? 8'h80: 8'h00;
+assign meter_green = meter_blue;
+assign meter_red = meter_blue;
+assign meter_blue = ena & in_box &  new_h > 'd195 & new_h < 'd204 & new_v > 'd88 - tape_data[7:2] & new_v < 'd80  ? 8'h80: 8'h00;
+
 //wire [6:0] idx = hcnt[10:4] - 7'd11;
-wire [6:0] idx = new_h[10:4] ;
+wire [6:0] idx = new_h[8:2] ;
 wire [7:0] db = seq >> { idx, 2'b0 };
 
 always @(posedge i_pix)

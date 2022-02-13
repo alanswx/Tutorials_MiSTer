@@ -3,4 +3,5 @@ set_global_assignment -name VERILOG_FILE rtl/vga.v
 set_global_assignment -name VERILOG_FILE rtl/soc.v
 set_global_assignment -name VERILOG_FILE rtl/overlay.v
 set_global_assignment -name VERILOG_FILE rtl/charmap.v
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/cas_bram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/bram.sv
