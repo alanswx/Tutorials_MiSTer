@@ -2,7 +2,9 @@
 
 1) Install Quartus 17.0.2
 
-Download [this](https://cdrdv2.intel.com/v1/dl/downloadStart/674766/674776?filename=Quartus-lite-17.0.2.602-windows.tar)
+Download [this](https://cdrdv2.intel.com/v1/dl/downloadStart/674766/674776?filename=Quartus-lite-17.0.2.602-windows.tar) version.
+
+OLD ONE:
 [old](http://download.altera.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-windows.tar) version.
 
 2) Install Github Deksop
