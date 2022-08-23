@@ -1,44 +1,43 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //*************************************************************************
 //
-// Copyright 2009-2020 by Wilson Snyder. This program is free software; you can
-// redistribute it and/or modify it under the terms of either the GNU
-// Lesser General Public License Version 3 or the Perl Artistic License.
-// Version 2.0.
+// Code available from: https://verilator.org
 //
-// Verilator is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// Copyright 2009-2021 by Wilson Snyder. This program is free software; you can
+// redistribute it and/or modify it under the terms of either the GNU
+// Lesser General Public License Version 3 or the Perl Artistic License
+// Version 2.0.
+// SPDX-License-Identifier: LGPL-3.0-only OR Artistic-2.0
 //
 //*************************************************************************
 ///
 /// \file
-/// \brief Verilator: Common include for all Verilated SystemC files
+/// \brief Verilated SystemC header for all Verilated SystemC files
 ///
-///     This file is included automatically by Verilator at the top of
-///     all SystemC files it generates.
+/// This file is included automatically by Verilator at the top of all
+/// SystemC files it generates.  It contains functions Verilated code uses
+/// internally to connect the Verilated model into SystemC.
 ///
-/// Code available from: https://verilator.org
+/// User wrapper code is not required to include nor use anything in this
+/// header, but may prefer to include it in place of "verilated.h" when
+/// using Verilator with SystemC.
 ///
 //*************************************************************************
 
-#ifndef _VERILATED_SC_H_
-#define _VERILATED_SC_H_ 1  ///< Header Guard
+#ifndef VERILATOR_VERILATED_SC_H_
+#define VERILATOR_VERILATED_SC_H_
 
 #include "verilatedos.h"
 
 #include "systemc.h"
 
 //=============================================================================
-// VL_SC_BV_DATAP
-// We want to get a pointer to m_data in the sc_bv_base class,
-// but it is protected.  So make an exposing class, then use
-// cast magic to get at it.  Saves patching get_datap in SystemC.
-// This class is thread safe (though most of SystemC is not).
-
+// For \internal use, get a pointer to m_data in the sc_bv_base class,
+// getting around that it is protected.  So make an exposing class, then
+// use cast magic to get at it.  Saves patching get_datap in SystemC.
 #define VL_SC_BV_DATAP(bv) (VlScBvExposer::sp_datap(bv))
-class VlScBvExposer : public sc_bv_base {
+// This class is thread safe (though most of SystemC is not).
+class VlScBvExposer final : public sc_bv_base {
 public:
     static const vluint32_t* sp_datap(const sc_bv_base& base) VL_MT_SAFE {
         return static_cast<const VlScBvExposer*>(&base)->sp_datatp();

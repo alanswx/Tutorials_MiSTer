@@ -18,6 +18,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
+ *
+ * SPDX-License-Identifier: MIT
  */
 
 #ifndef FST_API_H
@@ -33,7 +35,11 @@ extern "C" {
 #include <ctype.h>
 #include <zlib.h>
 #include <inttypes.h>
-#include <unistd.h>
+#if defined(_MSC_VER)
+    #include "fst_win_unistd.h"
+#else
+    #include <unistd.h>
+#endif
 #include <time.h>
 
 #define FST_RDLOAD "FSTLOAD | "

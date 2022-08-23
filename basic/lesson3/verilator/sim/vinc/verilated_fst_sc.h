@@ -10,36 +10,34 @@
 //=============================================================================
 ///
 /// \file
-/// \brief Verilated tracing in VCD format for SystemC header
+/// \brief Verilator tracing in FST format for SystemC header
 ///
-/// User wrapper code should use this header when creating VCD SystemC
+/// User wrapper code should use this header when creating FST SystemC
 /// traces.
 ///
 /// This class is not threadsafe, as the SystemC kernel is not threadsafe.
 ///
 //=============================================================================
 
-#ifndef VERILATOR_VERILATED_VCD_SC_H_
-#define VERILATOR_VERILATED_VCD_SC_H_
+#ifndef _VERILATED_FST_SC_H_
+#define _VERILATED_FST_SC_H_ 1
 
 #include "verilatedos.h"
 #include "verilated_sc.h"
-#include "verilated_vcd_c.h"
+#include "verilated_fst_c.h"
 
 //=============================================================================
-// VerilatedVcdSc
+// VerilatedFstSc
 ///
-/// Class representing a Verilator-friendly VCD trace format registered
-/// with the SystemC simulation kernel, just like a SystemC-documented
-/// trace format.
+/// This class is passed to the SystemC simulation kernel, just like a
+/// documented SystemC trace format.
 
-class VerilatedVcdSc final : sc_trace_file, public VerilatedVcdC {
+class VerilatedFstSc final : sc_trace_file, public VerilatedFstC {
     // CONSTRUCTORS
-    VL_UNCOPYABLE(VerilatedVcdSc);
+    VL_UNCOPYABLE(VerilatedFstSc);
 
 public:
-    /// Construct a SC trace object, and register with the SystemC kernel
-    VerilatedVcdSc() {
+    VerilatedFstSc() {
         sc_get_curr_simcontext()->add_trace_file(this);
         // We want to avoid a depreciated warning, but still be back compatible.
         // Turning off the message just for this still results in an
@@ -51,17 +49,16 @@ public:
         }
         spTrace()->set_time_resolution(sc_get_time_resolution().to_string());
     }
-    /// Destruct, flush, and close the dump
-    virtual ~VerilatedVcdSc() { close(); }
+    virtual ~VerilatedFstSc() { close(); }
 
-    // METHODS - for SC kernel
-    // Called by SystemC simulate()
+    // METHODS
+    /// Called by SystemC simulate()
     virtual void cycle(bool delta_cycle) {
-        if (!delta_cycle) this->dump(sc_time_stamp().to_double());
+        if (!delta_cycle) { this->dump(sc_time_stamp().to_double()); }
     }
 
 private:
-    // METHODS - Fake outs for linker
+    /// Fake outs for linker
 
 #ifdef NC_SYSTEMC
     // Cadence Incisive has these as abstract functions so we must create them
