@@ -1,26 +1,26 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //=============================================================================
 //
-// THIS MODULE IS PUBLICLY LICENSED
+// Code available from: https://verilator.org
 //
-// Copyright 2012-2020 by Wilson Snyder.  This program is free software;
-// you can redistribute it and/or modify it under the terms of either the GNU
-// Lesser General Public License Version 3 or the Perl Artistic License Version 2.0.
-//
-// This is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-// for more details.
+// Copyright 2000-2021 by Wilson Snyder. This program is free software; you
+// can redistribute it and/or modify it under the terms of either the GNU
+// Lesser General Public License Version 3 or the Perl Artistic License
+// Version 2.0.
+// SPDX-License-Identifier: LGPL-3.0-only OR Artistic-2.0
 //
 //=============================================================================
 ///
 /// \file
-/// \brief Save-restore serialization of verilated modules
+/// \brief Verilated save-restore serialization header
+///
+/// This must be included in user wrapper code that wants to use
+/// save/restore.
 ///
 //=============================================================================
 
-#ifndef _VERILATED_SAVE_C_H_
-#define _VERILATED_SAVE_C_H_ 1
+#ifndef VERILATOR_VERILATED_SAVE_C_H_
+#define VERILATOR_VERILATED_SAVE_C_H_
 
 #include "verilatedos.h"
 #include "verilated_heavy.h"
@@ -28,81 +28,98 @@
 #include <string>
 
 //=============================================================================
-// VerilatedSerialize - convert structures to a stream representation
-// This class is not thread safe, it must be called by a single thread
+// VerilatedSerialize
+/// Class for writing serialization of structures to a stream representation.
+///
+/// User wrapper code will more typically use VerilatedSave which uses this
+/// as a subclass to write a file.
+///
+/// This class is not thread safe, it must be called by a single thread
 
-class VerilatedSerialize {
+class VerilatedSerialize VL_NOT_FINAL {
 protected:
     // MEMBERS
     // For speed, keep m_cp as the first member of this structure
-    vluint8_t* m_cp;  ///< Current pointer into m_bufp buffer
-    vluint8_t* m_bufp;  ///< Output buffer
-    bool m_isOpen;  ///< True indicates open file/stream
-    std::string m_filename;  ///< Filename, for error messages
-    VerilatedAssertOneThread m_assertOne;  ///< Assert only called from single thread
+    vluint8_t* m_cp;  // Current pointer into m_bufp buffer
+    vluint8_t* m_bufp;  // Output buffer
+    bool m_isOpen = false;  // True indicates open file/stream
+    std::string m_filename;  // Filename, for error messages
+    VerilatedAssertOneThread m_assertOne;  // Assert only called from single thread
 
-    inline static size_t bufferSize() { return 256 * 1024; }  // See below for slack calculation
-    inline static size_t bufferInsertSize() { return 16 * 1024; }
+    static constexpr size_t bufferSize() { return 256 * 1024; }  // See below for slack calculation
+    static constexpr size_t bufferInsertSize() { return 16 * 1024; }
 
     void header() VL_MT_UNSAFE_ONE;
     void trailer() VL_MT_UNSAFE_ONE;
 
     // CONSTRUCTORS
     VL_UNCOPYABLE(VerilatedSerialize);
+
 public:
+    /// Construct
     VerilatedSerialize() {
-        m_isOpen = false;
         m_bufp = new vluint8_t[bufferSize()];
         m_cp = m_bufp;
     }
+    /// Flish, close, and destruct
     virtual ~VerilatedSerialize() {
         close();
-        if (m_bufp) { delete m_bufp; m_bufp=NULL; }
+        if (m_bufp) VL_DO_CLEAR(delete[] m_bufp, m_bufp = nullptr);
     }
     // METHODS
+    /// Return true if file is open
     bool isOpen() const { return m_isOpen; }
+    /// Return current filename
     std::string filename() const { return m_filename; }
+    /// Close the stream
     virtual void close() VL_MT_UNSAFE_ONE { flush(); }
+    /// Flush pending data to stream
     virtual void flush() VL_MT_UNSAFE_ONE {}
-    inline VerilatedSerialize& write(const void* __restrict datap, size_t size) VL_MT_UNSAFE_ONE {
+    /// Write data to stream
+    VerilatedSerialize& write(const void* __restrict datap, size_t size) VL_MT_UNSAFE_ONE {
         const vluint8_t* __restrict dp = (const vluint8_t* __restrict)datap;
         while (size) {
             bufferCheck();
-            size_t blk = size;  if (blk>bufferInsertSize()) blk = bufferInsertSize();
+            size_t blk = size;
+            if (blk > bufferInsertSize()) blk = bufferInsertSize();
             const vluint8_t* __restrict maxp = dp + blk;
-            while (dp < maxp) *m_cp++ = *dp++;
+            for (; dp < maxp; *m_cp++ = *dp++) {}
             size -= blk;
         }
         return *this;  // For function chaining
     }
+
 private:
     VerilatedSerialize& bufferCheck() VL_MT_UNSAFE_ONE {
         // Flush the write buffer if there's not enough space left for new information
         // We only call this once per vector, so we need enough slop for a very wide "b###" line
-        if (VL_UNLIKELY(m_cp > (m_bufp+(bufferSize()-bufferInsertSize())))) {
-            flush();
-        }
+        if (VL_UNLIKELY(m_cp > (m_bufp + (bufferSize() - bufferInsertSize())))) flush();
         return *this;  // For function chaining
     }
 };
 
 //=============================================================================
-// VerilatedDeserial - load structures from a stream representation
-// This class is not thread safe, it must be called by a single thread
+// VerilatedDeserialize
+/// Class for loading structures from a stream representation.
+///
+/// User wrapper code will more typically use VerilatedRestore which uses
+/// this as a subclass to a read from a file.
+///
+/// This class is not thread safe, it must be called by a single thread
 
-class VerilatedDeserialize {
+class VerilatedDeserialize VL_NOT_FINAL {
 protected:
     // MEMBERS
     // For speed, keep m_cp as the first member of this structure
-    vluint8_t* m_cp;  ///< Current pointer into m_bufp buffer
-    vluint8_t* m_bufp;  ///< Output buffer
-    vluint8_t* m_endp;  ///< Last valid byte in m_bufp buffer
-    bool m_isOpen;  ///< True indicates open file/stream
-    std::string m_filename;  ///< Filename, for error messages
-    VerilatedAssertOneThread m_assertOne;  ///< Assert only called from single thread
+    vluint8_t* m_cp;  // Current pointer into m_bufp buffer
+    vluint8_t* m_bufp;  // Output buffer
+    vluint8_t* m_endp = nullptr;  // Last valid byte in m_bufp buffer
+    bool m_isOpen = false;  // True indicates open file/stream
+    std::string m_filename;  // Filename, for error messages
+    VerilatedAssertOneThread m_assertOne;  // Assert only called from single thread
 
-    inline static size_t bufferSize() { return 256 * 1024; }  // See below for slack calculation
-    inline static size_t bufferInsertSize() { return 16 * 1024; }
+    static constexpr size_t bufferSize() { return 256 * 1024; }  // See below for slack calculation
+    static constexpr size_t bufferInsertSize() { return 16 * 1024; }
 
     virtual void fill() = 0;
     void header() VL_MT_UNSAFE_ONE;
@@ -110,87 +127,111 @@ protected:
 
     // CONSTRUCTORS
     VL_UNCOPYABLE(VerilatedDeserialize);
+
 public:
+    /// Construct
     VerilatedDeserialize() {
-        m_isOpen = false;
         m_bufp = new vluint8_t[bufferSize()];
         m_cp = m_bufp;
-        m_endp = NULL;
     }
+    /// Destruct
     virtual ~VerilatedDeserialize() {
         close();
-        if (m_bufp) { delete m_bufp; m_bufp=NULL; }
+        if (m_bufp) VL_DO_CLEAR(delete[] m_bufp, m_bufp = nullptr);
     }
     // METHODS
+    /// Return true if file is open
     bool isOpen() const { return m_isOpen; }
+    /// Return current filename
     std::string filename() const { return m_filename; }
+    /// Close the stream
     virtual void close() VL_MT_UNSAFE_ONE { flush(); }
+    /// Flush pending data to stream
     virtual void flush() VL_MT_UNSAFE_ONE {}
-    inline VerilatedDeserialize& read(void* __restrict datap, size_t size) VL_MT_UNSAFE_ONE {
-        vluint8_t* __restrict dp = (vluint8_t* __restrict)datap;
+    /// Read data from stream
+    VerilatedDeserialize& read(void* __restrict datap, size_t size) VL_MT_UNSAFE_ONE {
+        vluint8_t* __restrict dp = static_cast<vluint8_t* __restrict>(datap);
         while (size) {
             bufferCheck();
-            size_t blk = size;  if (blk>bufferInsertSize()) blk = bufferInsertSize();
+            size_t blk = size;
+            if (blk > bufferInsertSize()) blk = bufferInsertSize();
             const vluint8_t* __restrict maxp = dp + blk;
-            while (dp < maxp) *dp++ = *m_cp++;
+            for (; dp < maxp; *dp++ = *m_cp++) {}
             size -= blk;
         }
         return *this;  // For function chaining
     }
+
+    // Internal use:
     // Read a datum and compare with expected value
     VerilatedDeserialize& readAssert(const void* __restrict datap, size_t size) VL_MT_UNSAFE_ONE;
     VerilatedDeserialize& readAssert(vluint64_t data) VL_MT_UNSAFE_ONE {
-        return readAssert(&data, sizeof(data)); }
+        return readAssert(&data, sizeof(data));
+    }
+
 private:
     bool readDiffers(const void* __restrict datap, size_t size) VL_MT_UNSAFE_ONE;
     VerilatedDeserialize& bufferCheck() VL_MT_UNSAFE_ONE {
         // Flush the write buffer if there's not enough space left for new information
         // We only call this once per vector, so we need enough slop for a very wide "b###" line
-        if (VL_UNLIKELY((m_cp+bufferInsertSize()) > m_endp)) {
-            fill();
-        }
+        if (VL_UNLIKELY((m_cp + bufferInsertSize()) > m_endp)) fill();
         return *this;  // For function chaining
     }
 };
 
 //=============================================================================
-// VerilatedSave - serialize to a file
-// This class is not thread safe, it must be called by a single thread
+// VerilatedSave
+/// Stream-like object that serializes Verilated model to a file.
+///
+/// This class is not thread safe, it must be called by a single thread
 
-class VerilatedSave : public VerilatedSerialize {
+class VerilatedSave final : public VerilatedSerialize {
 private:
-    int m_fd;  ///< File descriptor we're writing to
+    int m_fd = -1;  // File descriptor we're writing to
 
 public:
     // CONSTRUCTORS
-    VerilatedSave() { m_fd = -1; }
-    virtual ~VerilatedSave() VL_OVERRIDE { close(); }
+    /// Construct new object
+    VerilatedSave() = default;
+    /// Flush, close and destruct
+    virtual ~VerilatedSave() override { close(); }
     // METHODS
-    void open(const char* filenamep) VL_MT_UNSAFE_ONE;  ///< Open the file; call isOpen() to see if errors
+    /// Open the file; call isOpen() to see if errors
+    void open(const char* filenamep) VL_MT_UNSAFE_ONE;
+    /// Open the file; call isOpen() to see if errors
     void open(const std::string& filename) VL_MT_UNSAFE_ONE { open(filename.c_str()); }
-    virtual void close() VL_OVERRIDE VL_MT_UNSAFE_ONE;
-    virtual void flush() VL_OVERRIDE VL_MT_UNSAFE_ONE;
+    /// Flush and close the file
+    virtual void close() override VL_MT_UNSAFE_ONE;
+    /// Flush data to file
+    virtual void flush() override VL_MT_UNSAFE_ONE;
 };
 
 //=============================================================================
-// VerilatedRestore - deserialize from a file
-// This class is not thread safe, it must be called by a single thread
+// VerilatedRestore
+/// Stream-like object that serializes Verilated model from a file.
+///
+/// This class is not thread safe, it must be called by a single thread
 
-class VerilatedRestore : public VerilatedDeserialize {
+class VerilatedRestore final : public VerilatedDeserialize {
 private:
-    int m_fd;  ///< File descriptor we're writing to
+    int m_fd = -1;  // File descriptor we're writing to
 
 public:
     // CONSTRUCTORS
-    VerilatedRestore() { m_fd = -1; }
-    virtual ~VerilatedRestore() VL_OVERRIDE { close(); }
+    /// Construct new object
+    VerilatedRestore() = default;
+    /// Flush, close and destruct
+    virtual ~VerilatedRestore() override { close(); }
 
     // METHODS
-    void open(const char* filenamep) VL_MT_UNSAFE_ONE;  ///< Open the file; call isOpen() to see if errors
+    /// Open the file; call isOpen() to see if errors
+    void open(const char* filenamep) VL_MT_UNSAFE_ONE;
+    /// Open the file; call isOpen() to see if errors
     void open(const std::string& filename) VL_MT_UNSAFE_ONE { open(filename.c_str()); }
-    virtual void close() VL_OVERRIDE VL_MT_UNSAFE_ONE;
-    virtual void flush() VL_OVERRIDE VL_MT_UNSAFE_ONE {}
-    virtual void fill() VL_OVERRIDE VL_MT_UNSAFE_ONE;
+    /// Close the file
+    virtual void close() override VL_MT_UNSAFE_ONE;
+    virtual void flush() override VL_MT_UNSAFE_ONE {}
+    virtual void fill() override VL_MT_UNSAFE_ONE;
 };
 
 //=============================================================================
@@ -237,7 +278,7 @@ inline VerilatedSerialize& operator<<(VerilatedSerialize& os, float& rhs) {
 inline VerilatedDeserialize& operator>>(VerilatedDeserialize& os, float& rhs) {
     return os.read(&rhs, sizeof(rhs));
 }
-inline VerilatedSerialize& operator<<(VerilatedSerialize& os, std::string& rhs) {
+inline VerilatedSerialize& operator<<(VerilatedSerialize& os, const std::string& rhs) {
     vluint32_t len = rhs.length();
     os << len;
     return os.write(rhs.data(), len);
@@ -248,15 +289,17 @@ inline VerilatedDeserialize& operator>>(VerilatedDeserialize& os, std::string& r
     rhs.resize(len);
     return os.read((void*)rhs.data(), len);
 }
+VerilatedSerialize& operator<<(VerilatedSerialize& os, VerilatedContext* rhsp);
+VerilatedDeserialize& operator>>(VerilatedDeserialize& os, VerilatedContext* rhsp);
+
 template <class T_Key, class T_Value>
 VerilatedSerialize& operator<<(VerilatedSerialize& os, VlAssocArray<T_Key, T_Value>& rhs) {
     os << rhs.atDefault();
     vluint32_t len = rhs.size();
     os << len;
-    for (typename VlAssocArray<T_Key, T_Value>::const_iterator it = rhs.begin();
-         it != rhs.end(); ++it) {
-        T_Key index = it->first;  // Copy to get around const_iterator
-        T_Value value = it->second;
+    for (const auto& i : rhs) {
+        T_Key index = i.first;  // Copy to get around const_iterator
+        T_Value value = i.second;
         os << index << value;
     }
     return os;

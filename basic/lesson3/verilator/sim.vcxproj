@@ -20,12 +20,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -75,6 +75,9 @@
     <ClCompile Include="obj_dir\Vtop.cpp" />
     <ClCompile Include="obj_dir\Vtop__Dpi.cpp" />
     <ClCompile Include="obj_dir\Vtop__Syms.cpp" />
+    <ClCompile Include="obj_dir\Vtop__1.cpp" />
+    <ClCompile Include="obj_dir\Vtop__1__Slow.cpp" />
+    <ClCompile Include="obj_dir\Vtop__Slow.cpp" />
     <ClCompile Include="sim_main.cpp" />
   </ItemGroup>
   <ItemGroup>

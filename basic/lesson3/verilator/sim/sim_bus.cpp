@@ -33,6 +33,13 @@ void SimBus::QueueDownload(std::string file, int index) {
 	SimBus_DownloadChunk chunk = SimBus_DownloadChunk(file, index);
 	downloadQueue.push(chunk);
 }
+void SimBus::QueueDownload(std::string file, int index, bool restart) {
+	SimBus_DownloadChunk chunk = SimBus_DownloadChunk(file, index, restart);
+	downloadQueue.push(chunk);
+}
+bool SimBus::HasQueue() {
+	return downloadQueue.size() > 0;
+}
 
 int nextchar = 0;
 void SimBus::BeforeEval()
@@ -46,7 +53,9 @@ void SimBus::BeforeEval()
 
 		// If last index differs from this one then reset the addresses
 		if (currentDownload.index != *ioctl_index) { ioctl_next_addr = -1; }
-
+		// if we want to restart the ioctl_addr then reset it
+		// leave it the same if we want to be able to load two roms sequentially
+		if (currentDownload.restart) { ioctl_next_addr = -1; }
 		// Set address and index
 		*ioctl_addr = ioctl_next_addr;
 		*ioctl_index = currentDownload.index;
@@ -84,8 +93,8 @@ void SimBus::BeforeEval()
 		}
 	}
 	else {
-		ioctl_download = 0;
-		ioctl_wr = 0;
+		*ioctl_download = 0;
+		*ioctl_wr = 0;
 	}
 }
 

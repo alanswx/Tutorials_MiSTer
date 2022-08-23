@@ -17,7 +17,6 @@ bool                  ScrollToBottom;
 ImVector<char*>       Items;
 static char* Strdup(const char* str) { size_t len = strlen(str) + 1; void* buf = malloc(len); IM_ASSERT(buf); return (char*)memcpy(buf, (const void*)str, len); }
 
-
 void DebugConsole::AddLog(const char* fmt, ...) IM_FMTARGS(2)
 {
 	// FIXME-OPT
@@ -63,9 +62,9 @@ void DebugConsole::ClearLog()
 	Items.clear();
 }
 
-void DebugConsole::Draw(const char* title, bool* p_open)
+void DebugConsole::Draw(const char* title, bool* p_open, ImVec2 size)
 {
-	ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
+	ImGui::SetWindowSize(title, size, ImGuiCond_Once);
 	if (!ImGui::Begin(title, p_open))
 	{
 		ImGui::End();

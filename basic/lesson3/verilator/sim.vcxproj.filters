@@ -27,6 +27,15 @@
     <ClCompile Include="obj_dir\Vtop__Syms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="obj_dir\Vtop__1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="obj_dir\Vtop__1__Slow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="obj_dir\Vtop__Slow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="sim\vinc\verilated.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
