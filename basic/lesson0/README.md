@@ -2,10 +2,12 @@
 
 1) Install Quartus 17.0.2
 
-Download [this](https://cdrdv2.intel.com/v1/dl/downloadStart/674766/674776?filename=Quartus-lite-17.0.2.602-windows.tar) version.
+Download [this](https://downloads.intel.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-windows.tar)
+
 
 OLD ONE:
-[old](http://download.altera.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-windows.tar) version.
+[old](https://cdrdv2.intel.com/v1/dl/downloadStart/674766/674776?filename=Quartus-lite-17.0.2.602-windows.tar) version.
+[older](http://download.altera.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-windows.tar) version.
 
 2) Install Github Deksop
 
@@ -18,7 +20,8 @@ OLD ONE:
 
 ### Linux (Ubuntu 20.04) notes for installing and running quartus
 
-Download  [this](http://download.altera.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-linux.tar) version.
+Download 
+[this](http://download.altera.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-linux.tar) version.
 
 Note: The installation scripts do not quite work - each component's install hangs for some reason, so if you try to install more than one at a time, the install won't complete correctly. In particular, the final step that tells the install that it's a lite install instead of standard doesn't happen, so the tool wants a license file. I followed these steps to get a working install from the command line. If you run the GUI installer, it will be similar questions - just make sure you only install one component at a time.
 
