@@ -1,71 +1,74 @@
-// -*- mode: C++; c-file-style: "cc-mode" -*-
-//*************************************************************************
+// -*- mode: C++; c-file-style: "cc-mode"
+//-*- *************************************************************************
 //
-// Copyright 2003-2020 by Wilson Snyder. This program is free software; you can
+// Code available from: https://verilator.org
+//
+// Copyright 2003-2021 by Wilson Snyder. This program is free software; you can
 // redistribute it and/or modify it under the terms of either the GNU
-// Lesser General Public License Version 3 or the Perl Artistic License.
+// Lesser General Public License Version 3 or the Perl Artistic License
 // Version 2.0.
-//
-// Verilator is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// SPDX-License-Identifier: LGPL-3.0-only OR Artistic-2.0
 //
 //*************************************************************************
 ///
 /// \file
-/// \brief Verilator: Include to allow symbol inspection
+/// \brief Verilated symbol inspection header
 ///
-///     This file is for inclusion by files that need to inspect the symbol
-///     table.  It is not included in verilated.h (instead see
-///     verilated_sym_props.h) as it requires some heavyweight C++ classes.
+/// This file is for inclusion by user wrapper code that needs to inspect
+/// the symbol table.  It is not included in verilated.h (instead see
+/// verilated_sym_props.h) as it requires some heavyweight C++ classes.
 ///
-///     These classes are thread safe and read only. It is constructed only
-///     when a model is built (from the main thread).
+/// These classes are rarely used by user code; typical user code will
+/// instead use the VPI to access this information.
 ///
-/// Code available from: https://verilator.org
+/// These classes are thread safe and read only. It is constructed only
+/// when a model is built (from the main thread).
 ///
 //*************************************************************************
 
-#ifndef _VERILATED_SYMS_H_
-#define _VERILATED_SYMS_H_ 1  ///< Header Guard
+#ifndef VERILATOR_VERILATED_SYMS_H_
+#define VERILATOR_VERILATED_SYMS_H_
 
 #include "verilatedos.h"
 #include "verilated_heavy.h"
 #include "verilated_sym_props.h"
 
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 //======================================================================
-/// Types
+// Types
 
-/// Class to sort maps keyed by const char*'s
+// Class to sort maps keyed by const char*'s
 struct VerilatedCStrCmp {
     bool operator()(const char* a, const char* b) const { return std::strcmp(a, b) < 0; }
 };
 
-/// Map of sorted scope names to find associated scope class
-class VerilatedScopeNameMap
+// Map of sorted scope names to find associated scope class
+// This is a class instead of typedef/using to allow forward declaration in verilated.h
+class VerilatedScopeNameMap final
     : public std::map<const char*, const VerilatedScope*, VerilatedCStrCmp> {
 public:
-    VerilatedScopeNameMap() {}
-    ~VerilatedScopeNameMap() {}
+    VerilatedScopeNameMap() = default;
+    ~VerilatedScopeNameMap() = default;
 };
 
-/// Map of sorted variable names to find associated variable class
-class VerilatedVarNameMap : public std::map<const char*, VerilatedVar, VerilatedCStrCmp> {
+// Map of sorted variable names to find associated variable class
+// This is a class instead of typedef/using to allow forward declaration in verilated.h
+class VerilatedVarNameMap final : public std::map<const char*, VerilatedVar, VerilatedCStrCmp> {
 public:
-    VerilatedVarNameMap() {}
-    ~VerilatedVarNameMap() {}
+    VerilatedVarNameMap() = default;
+    ~VerilatedVarNameMap() = default;
 };
 
-typedef std::vector<const VerilatedScope*> VerilatedScopeVector;
-
-class VerilatedHierarchyMap : public std::map<const VerilatedScope*, VerilatedScopeVector> {
+// Map of parent scope to vector of children scopes
+// This is a class instead of typedef/using to allow forward declaration in verilated.h
+class VerilatedHierarchyMap final
+    : public std::unordered_map<const VerilatedScope*, std::vector<const VerilatedScope*>> {
 public:
-    VerilatedHierarchyMap() {}
-    ~VerilatedHierarchyMap() {}
+    VerilatedHierarchyMap() = default;
+    ~VerilatedHierarchyMap() = default;
 };
 
 #endif  // Guard

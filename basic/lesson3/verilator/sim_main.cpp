@@ -34,7 +34,7 @@ SimBus bus(console);
 
 // Input handling
 // --------------
-SimInput input(12);
+SimInput input(12, console);
 const int input_right = 0;
 const int input_left = 1;
 const int input_down = 2;
@@ -104,7 +104,7 @@ int verilate() {
 		// Output pixels on rising edge of pixel clock
 		if (clk_pix.clk && !clk_pix.old) {
 			uint32_t colour = 0xFF000000 | top->VGA_B << 16 | top->VGA_G << 8 | top->VGA_R;
-			video.Clock(top->VGA_HB, top->VGA_VB, colour);
+			video.Clock(top->VGA_HB, top->VGA_VB, top->VGA_HS, top->VGA_VS, colour);
 		}
 
 		// Simulate both edges of system clock
@@ -211,7 +211,7 @@ int main(int argc, char** argv, char** env) {
 		// --------
 		ImGui::NewFrame();
 
-		console.Draw("Debug Log", &showDebugWindow);
+		console.Draw("Debug Log", &showDebugWindow, ImVec2(520, 600));
 		ImGui::Begin(debugWindowTitle);
 		ImGui::SetWindowPos(debugWindowTitle, ImVec2(580, 10), ImGuiCond_Once);
 		ImGui::SetWindowSize(debugWindowTitle, ImVec2(1000, 1000), ImGuiCond_Once);
@@ -243,15 +243,15 @@ int main(int argc, char** argv, char** env) {
 
                 ImGui::Begin("ROM Editor");
         //mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
-                mem_edit_1.DrawContents(top->top__DOT__soc__DOT__rom__DOT__mem, 4096, 0);
+                mem_edit_1.DrawContents(&top->top__DOT__soc__DOT__rom__DOT__mem, 4096, 0);
                 ImGui::End();
                 ImGui::Begin("RAM Editor");
                 //mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
-                mem_edit_2.DrawContents(top->top__DOT__soc__DOT__ram__DOT__mem, 4096, 0);
+                mem_edit_2.DrawContents(&top->top__DOT__soc__DOT__ram__DOT__mem, 4096, 0);
                 ImGui::End();
                 ImGui::Begin("VRAM Editor");
                 //mem_edit_1.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem__DOT__mem, 16384, 0);
-                mem_edit_3.DrawContents(top->top__DOT__soc__DOT__vga__DOT__vmem, 16000, 0);
+                mem_edit_3.DrawContents(&top->top__DOT__soc__DOT__vga__DOT__vmem, 16000, 0);
                 ImGui::End();
 
 

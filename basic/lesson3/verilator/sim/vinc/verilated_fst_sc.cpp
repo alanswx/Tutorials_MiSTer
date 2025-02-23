@@ -1,7 +1,7 @@
 // -*- mode: C++; c-file-style: "cc-mode" -*-
 //=============================================================================
 //
-// Code available from: https://verilator.org
+// THIS MODULE IS PUBLICLY LICENSED
 //
 // Copyright 2001-2021 by Wilson Snyder. This program is free software; you
 // can redistribute it and/or modify it under the terms of either the GNU
@@ -12,17 +12,17 @@
 //=============================================================================
 ///
 /// \file
-/// \brief Verilated tracing in VCD Format implementation code
+/// \brief Verilated tracing in FST for SystemC implementation code
 ///
 /// This file must be compiled and linked against all Verilated objects
-/// that use --trace.
+/// that use --sc --trace-fst.
 ///
-/// Use "verilator --trace" to add this to the Makefile for the linker.
+/// Use "verilator --sc --trace-fst" to add this to the Makefile for the linker.
 ///
 //=============================================================================
 
 #include "verilatedos.h"
-#include "verilated_vcd_sc.h"
+#include "verilated_fst_sc.h"
 
 //======================================================================
 //======================================================================
@@ -30,13 +30,13 @@
 //--------------------------------------------------
 // SystemC 2.1.v1
 // cppcheck-suppress unusedFunction
-void VerilatedVcdSc::write_comment(const std::string&) {}
-void VerilatedVcdSc::trace(const unsigned int&, const std::string&, const char**) {}
+void VerilatedFstSc::write_comment(const std::string&) {}
+void VerilatedFstSc::trace(const unsigned int&, const std::string&, const char**) {}
 
 #define DECL_TRACE_METHOD_A(tp) \
-    void VerilatedVcdSc::trace(const tp& object, const std::string& name) {}
+    void VerilatedFstSc::trace(const tp& object, const std::string& name) {}
 #define DECL_TRACE_METHOD_B(tp) \
-    void VerilatedVcdSc::trace(const tp& object, const std::string& name, int width) {}
+    void VerilatedFstSc::trace(const tp& object, const std::string& name, int width) {}
 
 // clang-format off
 #if (SYSTEMC_VERSION >= 20171012)

@@ -25,6 +25,7 @@ int output_width = 512;
 int output_height = 512;
 int output_rotate = 0;
 bool output_vflip = false;
+bool output_usevsync = 1;
 
 uint32_t* output_ptr = NULL;
 unsigned int output_size;
@@ -46,6 +47,9 @@ int count_line;
 int count_frame;
 bool last_hblank;
 bool last_vblank;
+bool last_hsync;
+bool last_vsync;
+bool frame_ready = 1;
 
 // Statistics
 #ifdef WIN32
@@ -190,8 +194,8 @@ SimVideo::SimVideo(int width, int height, int rotate)
 	old_time = 0;
 	stats_frameTime = 0;
 	stats_fps = 0.0;
-	stats_xMax = -100;
-	stats_yMax = -100;
+	stats_xMax = -1000;
+	stats_yMax = -1000;
 	stats_xMin = 1000;
 	stats_yMin = 1000;
 }
@@ -306,12 +310,12 @@ int SimVideo::Initialise(const char* windowTitle) {
 	{
 		D3D11_SAMPLER_DESC desc;
 		ZeroMemory(&desc, sizeof(desc));
-		desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 		desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 		desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		desc.MipLODBias = 0.f;
-		desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 		desc.MinLOD = 0.f;
 		desc.MaxLOD = 0.f;
 		g_pd3dDevice->CreateSamplerState(&desc, &g_pFontSampler);
@@ -335,19 +339,19 @@ void SimVideo::UpdateTexture() {
 	// Update the texture!
 	// D3D11_USAGE_DEFAULT MUST be set in the texture description (somewhere above) for this to work.
 	// (D3D11_USAGE_DYNAMIC is for use with map / unmap.) ElectronAsh.
-
-	g_pd3dDeviceContext->UpdateSubresource(texture, 0, NULL, output_ptr, output_width * 4, 0);
-
+	if (frame_ready) {
+		g_pd3dDeviceContext->UpdateSubresource(texture, 0, NULL, output_ptr, output_width * 4, 0);
+	}
 	// Rendering
 	ImGui::Render();
 	g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
 	g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, (float*)&clear_color);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-	g_pSwapChain->Present(0, 0); // Present without vsync
+	g_pSwapChain->Present(output_usevsync, 0); // Present without vsync
 #else
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, output_width, output_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, output_ptr);
-
+	if (frame_ready) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, output_width, output_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, output_ptr);
+	}
 	// Rendering
 	ImGui::Render();
 	glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
@@ -358,7 +362,7 @@ void SimVideo::UpdateTexture() {
 	SDL_GL_SwapWindow(window);
 #endif
 
-
+	frame_ready = 0;
 
 }
 
@@ -395,14 +399,48 @@ void SimVideo::StartFrame() {
 #endif
 }
 
-void SimVideo::Clock(bool hblank, bool vblank, uint32_t colour) {
+void SimVideo::Clock(bool hblank, bool vblank, bool hsync, bool vsync, uint32_t colour) {
 
-	int ox = count_pixel + 1;
-	int oy = count_line;
+	bool de = !(hblank || vblank);
+
+	// Next line on rising hsync
+	if (!vblank) {
+		if (last_hsync && !hsync) {
+			// Increment line and reset pixel count
+			count_line++;
+			count_pixel = 0;
+		}
+		else {
+			// Increment pixel counter when not blanked
+			if (de) {
+				count_pixel++;
+			}
+		}
+	}
+
+	// Reset on rising vsync
+	if (last_vsync && !vsync) {
+		frame_ready = 1;
+		count_frame++;
+		count_line = 0;
+#ifdef WIN32
+		GetSystemTime(&actualtime);
+		time_ms = (actualtime.wSecond * 1000) + actualtime.wMilliseconds;
+#else
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		time_ms = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000; // convert tv_sec & tv_usec to millisecond
+#endif
+		stats_frameTime = time_ms - old_time;
+		old_time = time_ms;
+		stats_fps = (float)(1000.0 / stats_frameTime);
+	}
 
 	// Only draw outside of blanks
-	if (!(hblank || vblank)) {
+	if (de) {
 
+		int ox = count_pixel - 1;
+		int oy = count_line - 1;
 		int x = ox, xs = output_width, y = oy;
 
 		if (output_rotate == -1) {
@@ -434,42 +472,16 @@ void SimVideo::Clock(bool hblank, bool vblank, uint32_t colour) {
 		// Write pixel to texture
 		output_ptr[vga_addr] = colour;
 
-		// Track bounds (debug)
-		if (x > stats_xMax) { stats_xMax = x; }
-		if (y > stats_yMax) { stats_yMax = y; }
-		if (x < stats_xMin) { stats_xMin = x; }
-		if (y < stats_yMin) { stats_yMin = y; }
-
 	}
 
-	// Increment pixel counter
-	count_pixel++;
+	// Track bounds (debug)
+	if (count_pixel > stats_xMax) { stats_xMax = count_pixel; }
+	if (count_line > stats_yMax) { stats_yMax = count_line; }
+	if (count_pixel < stats_xMin) { stats_xMin = count_pixel; }
+	if (count_line < stats_yMin) { stats_yMin = count_line; }
 
-	// Falling edge of hblank
-	if (last_hblank && !hblank) {
-		// Increment line and reset pixel count
-		count_line++;
-		count_pixel = 0;
-	}
-
-	// Falling edge of vblank
-	if (last_vblank && !vblank) {
-		count_frame++;
-		count_line = 0;
-
-#ifdef WIN32
-		GetSystemTime(&actualtime);
-		time_ms = (actualtime.wSecond * 1000) + actualtime.wMilliseconds;
-#else
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		time_ms = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000; // convert tv_sec & tv_usec to millisecond
-#endif
-		stats_frameTime = time_ms - old_time;
-		old_time = time_ms;
-		stats_fps = (float)(1000.0 / stats_frameTime);
-
-	}
 	last_hblank = hblank;
 	last_vblank = vblank;
+	last_hsync = hsync;
+	last_vsync = vsync;
 }

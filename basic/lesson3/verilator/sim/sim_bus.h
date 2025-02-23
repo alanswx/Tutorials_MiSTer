@@ -9,11 +9,11 @@
 #define WIN32
 #endif
 
-
 struct SimBus_DownloadChunk {
 public:
 	std::string file;
 	int index;
+	bool restart;
 	
 	SimBus_DownloadChunk() {
 		file = "";
@@ -21,6 +21,12 @@ public:
 	}
 
 	SimBus_DownloadChunk(std::string file, int index) {
+		this->restart = false;
+		this->file = std::string(file);
+		this->index = index;
+	}
+	SimBus_DownloadChunk(std::string file, int index, bool restart) {
+		this->restart = restart;
 		this->file = std::string(file);
 		this->index = index;
 	}
@@ -41,6 +47,8 @@ public:
 	void BeforeEval(void);
 	void AfterEval(void);
 	void QueueDownload(std::string file, int index);
+	void QueueDownload(std::string file, int index, bool restart);
+	bool HasQueue();
 
 	SimBus(DebugConsole c);
 	~SimBus();
