@@ -9,7 +9,7 @@ OLD ONE:
 [old](https://cdrdv2.intel.com/v1/dl/downloadStart/674766/674776?filename=Quartus-lite-17.0.2.602-windows.tar) version.
 [older](http://download.altera.com/akdlm/software/acdsinst/17.0std.2/602/ib_tar/Quartus-lite-17.0.2.602-windows.tar) version.
 
-2) Install Github Deksop
+2) Install Github Desktop
 
 3) Checkout [Template](https://github.com/MiSTer-devel/Template_MiSTer) Repo
 
